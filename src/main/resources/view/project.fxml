@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionprojet.controller.ProjectController"
+      alignment="CENTER"
+      spacing="10"
+      prefWidth="400" prefHeight="400">
+
+    <Label text="Nom du projet"/>
+    <TextField fx:id="ProjectName"/>
+
+    <Label text="Description"/>
+    <TextArea fx:id="ProjectDesc"/>
+
+    <Label text="Date début"/>
+    <DatePicker fx:id="ProjectStartDate"/>
+
+    <Label text="Date fin"/>
+    <DatePicker fx:id="ProjectEndDate"/>
+
+    <Label fx:id="errorLabel" textFill="red" visible="false"/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Annuler" onAction="#handleCancel"/>
+        <Button text="Enregistrer" onAction="#handleSave"/>
+    </HBox>
+</VBox>
