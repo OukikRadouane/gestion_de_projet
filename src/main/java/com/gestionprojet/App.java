@@ -1,13 +1,17 @@
 package com.gestionprojet;
-import com.gestionprojet.model.*;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class App {
+import java.util.Objects;
+
+public class App extends Application {
     public static void main(String[] args) {
+        launch();
+        /*
+
         User user = new User();
         user.setUsername("oukik");
         user.setPasswordHash("qwerty");
@@ -36,5 +40,15 @@ public class App {
         session.persist(user2);
         session.persist(user3);
         transaction.commit();
+         */
+
+    }
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/signup.fxml")));
+        stage.setTitle("Login");
+        stage.setScene(new Scene(root,600,600));
+        stage.show();
     }
 }

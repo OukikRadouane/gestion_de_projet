@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="486.0" prefWidth="544.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestionprojet.controller.AuthController">
+   <left>
+      <AnchorPane prefHeight="400.0" prefWidth="215.0" style="-fx-background-color: orange;" BorderPane.alignment="CENTER">
+         <children>
+            <Text fill="#d05c19" layoutX="36.0" layoutY="124.0" rotate="37.0" scaleY="2.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Gestion De Projet" translateX="3.0" translateY="6.0" translateZ="7.0" wrappingWidth="130.25555419921875">
+               <font>
+                  <Font name="Algerian" size="14.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <effect>
+                  <Reflection />
+               </effect>
+               <rotationAxis>
+                  <Point3D x="12.0" y="40.0" z="5.0" />
+               </rotationAxis>
+            </Text>
+         </children>
+      </AnchorPane>
+   </left>
+   <center>
+      <AnchorPane accessibleRole="PASSWORD_FIELD" prefHeight="400.0" prefWidth="303.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+         <children>
+            <Text fill="#f2860be3" layoutX="121.0" layoutY="50.0" stroke="#c3b649e3" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 18; -fx-font-weight: 900; visibility: visible;" text="Sign Up" textAlignment="CENTER" underline="true">
+               <font>
+                  <Font name="Arial Bold" size="44.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Text>
+            <Label layoutX="23.0" layoutY="85.0" text="Nom :">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="23.0" layoutY="138.0" text="Prenom :" />
+            <Label accessibleRole="PASSWORD_FIELD" layoutX="30.0" layoutY="225.0" text="Password :" />
+            <Label layoutX="31.0" layoutY="284.0" text="Confirm Password :" />
+            <TextField fx:id="name" layoutX="77.0" layoutY="95.0" prefHeight="26.0" prefWidth="173.0" promptText="Entrer votre nom" />
+            <TextField fx:id="lastName" layoutX="77.0" layoutY="147.0" prefHeight="26.0" prefWidth="173.0" promptText="Entrer votre prenom" />
+
+            <PasswordField fx:id="mdp" layoutX="77.0" layoutY="243.0" prefHeight="26.0" prefWidth="173.0" promptText="Entrer votre mot de passe" />
+            <PasswordField fx:id="mdpConfirm" layoutX="82.0" layoutY="309.0" prefHeight="26.0" prefWidth="173.0" promptText="Confirmer mot de passe" />
+
+             <ChoiceBox fx:id="roleField" layoutX="94.0" layoutY="360.0" prefWidth="150.0" value="Member">
+                 <items>
+                     <FXCollections fx:factory="observableArrayList">
+                         <String fx:value="Member" />
+                         <String fx:value="Product Owner" />
+                         <String fx:value="Scrum Master" />
+                     </FXCollections>
+                 </items>
+             </ChoiceBox>
+
+            <Text layoutX="32.0" layoutY="356.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Role :" />
+            <Button fx:id="signupBtn" layoutX="107.0" layoutY="407.0" mnemonicParsing="false" onAction="#handleSigneup" prefHeight="25.0" prefWidth="113.0" style="-fx-background-color: orange;" text="S'inscrire" textFill="WHITE">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
+
+             <Hyperlink layoutX="142.0" layoutY="448.0" text="Vous avez dèja un compte ?" />
+
+             <Text layoutX="30.0" layoutY="201.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Email :" />
+            <TextField fx:id="mail" layoutX="77.0" layoutY="197.0" prefHeight="26.0" prefWidth="173.0" promptText="Entrer votre email" />
+            <Label fx:id="errorLabel" layoutX="93.0" layoutY="385.0" textFill="red" />
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

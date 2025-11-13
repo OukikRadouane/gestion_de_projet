@@ -1,5 +1,6 @@
 package com.gestionprojet.model;
 
+import com.gestionprojet.utils.SHA256;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -23,8 +24,14 @@ public class User {
 
     @Column
     private String role;
+    @Column
+    private String email;
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     private List<Project> projects;
+
+    public void setPasswordHash(String password) {
+        this.passwordHash = SHA256.sha256(password);
+    }
 
     public User(String username, String passwordHash) {
         this.username = username;
