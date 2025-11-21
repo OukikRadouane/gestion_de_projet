@@ -1,20 +1,28 @@
 package com.gestionprojet.controller;
 
-import com.gestionprojet.view.KanbanTask;
+import com.gestionprojet.model.Task;
+import com.gestionprojet.model.TaskStatus;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class PrimaryController {
 
@@ -24,7 +32,7 @@ public class PrimaryController {
     private Button addTaskButton;
     private BorderPane root;
 
-    private List<KanbanTask> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     public BorderPane createView() {
         root = new BorderPane();
@@ -43,13 +51,12 @@ public class PrimaryController {
         refreshColumns();
 
         // Set up drag and drop for columns
-        setupDropTarget(todoColumn, KanbanTask.TaskStatus.TODO);
-        setupDropTarget(doingColumn, KanbanTask.TaskStatus.DOING);
-        setupDropTarget(doneColumn, KanbanTask.TaskStatus.DONE);
+        setupDropTarget(todoColumn, TaskStatus.TO_DO);
+        setupDropTarget(doingColumn, TaskStatus.DOING);
+        setupDropTarget(doneColumn,TaskStatus.DONE);
 
         return root;
     }
-
     private VBox createTopBar() {
         VBox topBar = new VBox();
         topBar.setStyle("-fx-background-color: #2c3e50;");
@@ -101,7 +108,7 @@ public class PrimaryController {
 
     private VBox createColumnContainer(String title) {
         VBox columnContainer = new VBox(10);
-        HBox.setHgrow(columnContainer, Priority.ALWAYS);
+        HBox.setHgrow(columnContainer, javafx.scene.layout.Priority.ALWAYS);
         columnContainer.setMaxWidth(Double.MAX_VALUE);
         columnContainer.setPrefWidth(300);
         columnContainer.setStyle("-fx-background-color: #ecf0f1; -fx-background-radius: 5;");
@@ -128,7 +135,7 @@ public class PrimaryController {
     private void addColumnToContainer(VBox container, VBox column) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         scrollPane.setStyle("-fx-background: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
         scrollPane.setFocusTraversable(false);
         scrollPane.setContent(column);
@@ -137,72 +144,60 @@ public class PrimaryController {
     }
 
     private void addSampleTasks() {
-        tasks.add(new KanbanTask("Setup Project", "Initialize the JavaFX project with Maven", KanbanTask.TaskStatus.DONE));
-        tasks.add(new KanbanTask("Create Kanban Board", "Design and implement the Kanban board UI", KanbanTask.TaskStatus.DOING));
-        tasks.add(new KanbanTask("Integrate Database", "Connect the application to the database", KanbanTask.TaskStatus.TODO));
-        tasks.add(new KanbanTask("Add User Authentication", "Implement login and registration features", KanbanTask.TaskStatus.TODO));
+        tasks.add(new Task("Setup Project", "Initialize the JavaFX project with Maven",TaskStatus.DONE));
+        tasks.add(new Task("Create Kanban Board", "Design and implement the Kanban board UI", TaskStatus.DOING));
+        tasks.add(new Task("Integrate Database", "Connect the application to the database", TaskStatus.TO_DO));
+        tasks.add(new Task("Add User Authentication", "Implement login and registration features", TaskStatus.TO_DO));
     }
 
     private void handleAddTask() {
-        Dialog<KanbanTask> dialog = new Dialog<>();
-        dialog.setTitle("Add New Task");
-        dialog.setHeaderText("Create a new task");
+        try {
+            // Crée le stage pour le dialogue
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Ajouter une tâche");
 
-        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+            // Charge le FXML - vérifie le chemin exact
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/view/TaskDialog.fxml"));
+            Parent root = loader.load();
 
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(10));
+            // Récupère le contrôleur FXML
+            TaskDialogController dialogController = loader.getController();
 
-        TextField titleField = new TextField();
-        titleField.setPromptText("Task Title");
+            // Configure pour une nouvelle tâche
+            dialogController.setTask(null); // Pour indiquer que c'est une nouvelle tâche
+            // dialogController.setSprint(null); // Décommente si nécessaire
 
-        TextArea descriptionArea = new TextArea();
-        descriptionArea.setPromptText("Task Description");
-        descriptionArea.setPrefRowCount(3);
+            // Ouvre le dialogue
+            Scene scene = new Scene(root);
+            dialogStage.setScene(scene);
+            dialogStage.showAndWait();
 
-        ComboBox<KanbanTask.TaskStatus> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll(KanbanTask.TaskStatus.values());
-        statusCombo.setValue(KanbanTask.TaskStatus.TODO);
-
-        content.getChildren().addAll(
-            new Label("Title:"), titleField,
-            new Label("Description:"), descriptionArea,
-            new Label("Status:"), statusCombo
-        );
-
-        dialog.getDialogPane().setContent(content);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButtonType) {
-                return new KanbanTask(titleField.getText(), descriptionArea.getText(), statusCombo.getValue());
-            }
-            return null;
-        });
-
-        Optional<KanbanTask> result = dialog.showAndWait();
-        result.ifPresent(task -> {
-            tasks.add(task);
+            // Rafraîchit les colonnes après fermeture du dialogue
             refreshColumns();
-        });
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
+
+
 
     private void refreshColumns() {
         todoColumn.getChildren().clear();
         doingColumn.getChildren().clear();
         doneColumn.getChildren().clear();
 
-        for (KanbanTask task : tasks) {
+        for (Task task : tasks) {
             VBox taskCard = createTaskCard(task);
             switch (task.getStatus()) {
-                case TODO -> todoColumn.getChildren().add(taskCard);
+                case TO_DO -> todoColumn.getChildren().add(taskCard);
                 case DOING -> doingColumn.getChildren().add(taskCard);
                 case DONE -> doneColumn.getChildren().add(taskCard);
             }
         }
     }
 
-    private VBox createTaskCard(KanbanTask task) {
+    private VBox createTaskCard(Task task) {
         VBox card = new VBox(8);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-cursor: hand;");
         card.setPadding(new Insets(10));
@@ -235,7 +230,7 @@ public class PrimaryController {
         return card;
     }
 
-    private void setupDragSource(VBox card, KanbanTask task) {
+    private void setupDragSource(VBox card, Task task) {
         card.setOnDragDetected(event -> {
             Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent content = new ClipboardContent();
@@ -251,7 +246,7 @@ public class PrimaryController {
         });
     }
 
-    private void setupDropTarget(VBox column, KanbanTask.TaskStatus targetStatus) {
+    private void setupDropTarget(VBox column,TaskStatus targetStatus) {
         column.setOnDragOver(event -> {
             if (event.getGestureSource() != column && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
@@ -277,7 +272,7 @@ public class PrimaryController {
             if (dragboard.hasString()) {
                 String taskTitle = dragboard.getString();
                 // Find the task by title and update its status
-                for (KanbanTask task : tasks) {
+                for (Task task : tasks) {
                     if (task.getTitle().equals(taskTitle)) {
                         task.setStatus(targetStatus);
                         success = true;

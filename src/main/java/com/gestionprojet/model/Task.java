@@ -3,7 +3,6 @@ package com.gestionprojet.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import lombok.*;
 
 
 @Entity
@@ -37,7 +36,7 @@ public class Task {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
-    public Task() {
+    public Task(String setupProject, String s, TaskStatus done) {
         this.status = TaskStatus.TO_DO;
         this.priority = Priority.MEDIUM;
     }

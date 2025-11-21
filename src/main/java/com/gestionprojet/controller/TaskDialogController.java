@@ -8,7 +8,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class TaskDialogController {
     @FXML private Text titleText;
@@ -142,5 +141,13 @@ public class TaskDialogController {
         Stage stage = (Stage) taskNameField.getScene().getWindow();
         stage.close();
     }
-
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
     }
+    public Task getTask() {
+        return task;
+    }
+
+
+
+}
