@@ -92,7 +92,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.gestionprojet.gestiondeprojet/com.gestionprojet.HelloApplication
+                                com.gestionprojet.gestiondeprojet/com.gestionprojet.FXApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
