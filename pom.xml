@@ -28,6 +28,12 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>9.5.0</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
         <dependency>
@@ -83,6 +89,14 @@
                 </configuration>
             </plugin>
             <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>3.6.2</version>
+             <configuration>
+               <mainClass>com.gestionprojet.App</mainClass>
+             </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
@@ -91,9 +105,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>
-                                com.gestionprojet.gestiondeprojet/com.gestionprojet.HelloApplication
-                            </mainClass>
+                            <mainClass>com.gestionprojet.App</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
