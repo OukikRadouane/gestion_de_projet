@@ -5,13 +5,13 @@
 
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">W7301@jqir#</property>
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
 
         <mapping class="com.gestionprojet.model.User"/>
         <mapping class="com.gestionprojet.model.Project"/>
         <mapping class="com.gestionprojet.model.Sprint"/>
-        <mapping class="com.gestionprojet.model.Task"/>
+        <mapping class="com.gestionprojet.model.Tasks.Task"/>
 
 
     </session-factory>

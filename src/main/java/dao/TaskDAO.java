@@ -1,10 +1,10 @@
 package dao;
 
 import com.gestionprojet.model.Sprint;
-import com.gestionprojet.model.Task;
+import com.gestionprojet.model.Tasks.*;
 import com.gestionprojet.utils.HibernateUtil;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.SessionBuilder;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             session.beginTransaction();
-            session.persist(task);
+            session.merge(task);
             session.getTransaction().commit();
         } catch (Exception e) {
             if (session.getTransaction().isActive()) {
@@ -39,10 +39,11 @@ public class TaskDAO {
             session.close();
         }
     }
-    public void delete(Task task){
+    public void delete(Long id){
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             session.beginTransaction();
+            Task task = session.find(Task.class,id);
             if(task != null){
                 session.remove(task);
             }
@@ -55,7 +56,7 @@ public class TaskDAO {
             session.close();
         }
     }
-    public Task getById(int id){
+    public Task getById(Long id){
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.find(Task.class, id);
@@ -82,15 +83,77 @@ public class TaskDAO {
         }
 
     }
-    public List<Task> getBySprintAndStatus(Sprint sprint , String status){
+    public List<Task> getBySprintAndStatus(Sprint sprint , TaskStatus status) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        try{
+        try {
             return session.createQuery("Select t From Task t Where t.sprint= :sprint and t.status= :status Order By t.priority DESC, t.deadline", Task.class).
                     setParameter("sprint", sprint).setParameter("status", status).getResultList();
+        } finally {
+            session.close();
+        }
+    }
+
+    public Task getByIdWithCollections(Long id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            // Charger la tâche
+            Task task = session.find(Task.class, id);
+
+            // Initialiser explicitement les collections
+            if (task != null) {
+                Hibernate.initialize(task.getComments());
+                Hibernate.initialize(task.getSubtasks());
+                Hibernate.initialize(task.getLogs());
+            }
+
+            return task;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Méthode pour supprimer une sous-tâche
+    public void deleteSubtask(Subtask subtask) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            // Recharger la sous-tâche depuis la base de données pour s'assurer qu'elle est gérée
+            Subtask managedSubtask = session.find(Subtask.class, subtask.getId());
+            if (managedSubtask != null) {
+                session.remove(managedSubtask);
+            }
+
+            session.getTransaction().commit();
+        } catch(Exception e){
+            if(session.getTransaction().isActive()){
+                session.getTransaction().rollback();
+            }throw e;
         }finally {
             session.close();
         }
+    }
 
+    // Méthode pour supprimer un commentaire
+    public void deleteComment(Comment comment) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            // Recharger le commentaire depuis la base de données pour s'assurer qu'il est géré
+            Comment managedComment = session.find(Comment.class, comment.getId());
+            if (managedComment != null) {
+                session.remove(managedComment);
+            }
+
+            session.getTransaction().commit();
+        } catch(Exception e){
+            if(session.getTransaction().isActive()){
+                session.getTransaction().rollback();
+            }throw e;
+        }finally {
+            session.close();
+        }
     }
 
 }

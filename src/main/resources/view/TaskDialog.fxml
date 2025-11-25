@@ -30,22 +30,23 @@
     <HBox spacing="30">
         <VBox spacing="10">
             <Label>Date limite :</Label>
-            <DatePicker fx:id="dueDatePicker"/>
+            <DatePicker fx:id="dueDatePicker" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;"/>
         </VBox>
         <VBox spacing="10">
             <Label text="Assigné à :"/>
-            <ComboBox fx:id="assigneChoice"/>
+            <ComboBox fx:id="assigneChoice" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
+
         </VBox>
     </HBox>
 
     <HBox spacing="30">
         <VBox spacing="10">
             <Label text="Status :"/>
-            <ComboBox fx:id="statusChoice"/>
+            <ComboBox fx:id="statusChoice" prefWidth="200" style="-fx-background-color: white; -fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
         </VBox>
         <VBox spacing="10">
             <Label text="Priorité :"/>
-            <ComboBox fx:id="priorityChoice"/>
+            <ComboBox fx:id="priorityChoice" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
         </VBox>
     </HBox>
     <Label fx:id="errorLabel" text="" style="-fx-text-fill: red;" visible="false"/>
@@ -54,8 +55,8 @@
         <padding>
             <Insets top="10" right="0" bottom="0" left="0"/>
         </padding>
-        <Button text="Annuler" onAction="#handleCancel" styleClass="secondary-button" prefWidth="100.0"/>
-        <Button text="Enregistrer" onAction="#saveTask" styleClass="primary-button" prefWidth="100.0"/>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="secondary-button" prefWidth="100.0" style="-fx-background-color:#e74c3c; -fx-text-fill: white;"/>
+        <Button text="Enregistrer" onAction="#saveTask" styleClass="primary-button" prefWidth="100.0" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
     </HBox>
 
 </VBox>

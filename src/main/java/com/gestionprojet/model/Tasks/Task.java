@@ -1,8 +1,12 @@
-package com.gestionprojet.model;
+package com.gestionprojet.model.Tasks;
 
 
+import com.gestionprojet.model.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -14,7 +18,7 @@ public class Task {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -36,7 +40,16 @@ public class Task {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
-    public Task(String setupProject, String s, TaskStatus done) {
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subtask> subtasks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskLog> logs = new ArrayList<>();
+
+    public Task() {
         this.status = TaskStatus.TO_DO;
         this.priority = Priority.MEDIUM;
     }
@@ -67,4 +80,55 @@ public class Task {
     public void setAssignee(User assignee) { this.assignee = assignee; }
     public Sprint getSprint() { return sprint; }
     public void setSprint(Sprint sprint) { this.sprint = sprint; }
+
+    public void addComment(Comment comment) {
+        if (comments == null) {
+            comments = new ArrayList<>();
+        }
+        comments.add(comment);
+        comment.setTask(this);
+    }
+
+    public void removeComment(Comment comment) {
+        if (comments != null && comments.contains(comment)) {
+            comments.remove(comment);
+            comment.setTask(null);
+        }
+    }
+
+    public void addSubtask(Subtask subtask) {
+        if (subtasks == null) {
+            subtasks = new ArrayList<>();
+        }
+        subtasks.add(subtask);
+        subtask.setTask(this);
+    }
+
+    public void removeSubtask(Subtask subtask) {
+        if (subtasks != null && subtasks.contains(subtask)) {
+            subtasks.remove(subtask);
+            subtask.setTask(null);
+        }
+    }
+
+    public void addLog(String message) {
+        TaskLog log = new TaskLog();
+        log.setMessage(message);
+        log.setTimestamp(LocalDateTime.now());
+        log.setTask(this);
+        logs.add(log);
+    }
+
+    public List<TaskLog> getLogs() {
+        return logs;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public List<Subtask> getSubtasks() {
+        return subtasks;
+    }
+
 }

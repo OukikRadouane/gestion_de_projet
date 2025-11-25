@@ -1,4 +1,4 @@
-package com.gestionprojet.model;
+package com.gestionprojet.model.Tasks;
 
 public enum TaskStatus {
     TO_DO("To Do"),

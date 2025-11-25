@@ -1,7 +1,8 @@
 package com.gestionprojet.controller;
 
-import com.gestionprojet.model.Task;
-import com.gestionprojet.model.TaskStatus;
+import com.gestionprojet.model.Tasks.Task;
+import com.gestionprojet.model.Tasks.TaskStatus;
+import dao.TaskDAO;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,10 +20,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+
 
 public class PrimaryController {
 
@@ -32,7 +34,18 @@ public class PrimaryController {
     private Button addTaskButton;
     private BorderPane root;
 
-    private List<Task> tasks = new ArrayList<>();
+    private List<Task> tasks ;
+
+    private  final TaskDAO taskDAO = new TaskDAO();
+
+    public PrimaryController() {
+        tasks = taskDAO.getAll();
+        System.out.println("Nombre de tâches chargées : " + tasks.size()); // ← Ajoutez ce debug
+        for (Task task : tasks) {
+            System.out.println("Tâche : " + task.getTitle() + " - Statut : " + task.getStatus());
+        }
+    }
+
 
     public BorderPane createView() {
         root = new BorderPane();
@@ -46,17 +59,15 @@ public class PrimaryController {
         // Create kanban columns
         root.setCenter(createKanbanColumns());
 
-        // Initialize data and setup
-        addSampleTasks();
-        refreshColumns();
-
-        // Set up drag and drop for columns
         setupDropTarget(todoColumn, TaskStatus.TO_DO);
         setupDropTarget(doingColumn, TaskStatus.DOING);
-        setupDropTarget(doneColumn,TaskStatus.DONE);
+        setupDropTarget(doneColumn, TaskStatus.DONE);
+
+        refreshColumns();
 
         return root;
     }
+
     private VBox createTopBar() {
         VBox topBar = new VBox();
         topBar.setStyle("-fx-background-color: #2c3e50;");
@@ -143,44 +154,54 @@ public class PrimaryController {
         container.getChildren().add(scrollPane);
     }
 
-    private void addSampleTasks() {
-        tasks.add(new Task("Setup Project", "Initialize the JavaFX project with Maven",TaskStatus.DONE));
-        tasks.add(new Task("Create Kanban Board", "Design and implement the Kanban board UI", TaskStatus.DOING));
-        tasks.add(new Task("Integrate Database", "Connect the application to the database", TaskStatus.TO_DO));
-        tasks.add(new Task("Add User Authentication", "Implement login and registration features", TaskStatus.TO_DO));
-    }
-
     private void handleAddTask() {
         try {
-            // Crée le stage pour le dialogue
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Ajouter une tâche");
 
-            // Charge le FXML - vérifie le chemin exact
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/resources/view/TaskDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
             Parent root = loader.load();
 
-            // Récupère le contrôleur FXML
             TaskDialogController dialogController = loader.getController();
 
-            // Configure pour une nouvelle tâche
-            dialogController.setTask(null); // Pour indiquer que c'est une nouvelle tâche
-            // dialogController.setSprint(null); // Décommente si nécessaire
-
-            // Ouvre le dialogue
-            Scene scene = new Scene(root);
-            dialogStage.setScene(scene);
+            dialogController.setSprint(null);
+            dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
 
-            // Rafraîchit les colonnes après fermeture du dialogue
-            refreshColumns();
+            Task newTask = dialogController.getTask();
+            if (newTask != null) {
+                tasks = taskDAO.getAll();
+                refreshColumns();
+            }
 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
+    private void handleEditTask(Task task) {
+        try {
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Modifier une tâche");
 
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
+            Parent root = loader.load();
+
+            TaskDialogController dialogController = loader.getController();
+            dialogController.setTask(task); // ← Initialiser avec la tâche existante
+            dialogController.setSprint(null);
+
+            dialogStage.setScene(new Scene(root));
+            dialogStage.showAndWait();
+
+            // Rafraîchir après édition
+            tasks = taskDAO.getAll();
+            refreshColumns();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private void refreshColumns() {
         todoColumn.getChildren().clear();
@@ -211,21 +232,29 @@ public class PrimaryController {
         descLabel.setWrapText(true);
 
         // Action buttons
-        HBox buttonBox = new HBox(5);
+        HBox buttonBox = new HBox(8);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
         Button deleteButton = new Button("Delete");
         deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px;");
         deleteButton.setOnAction(e -> {
-            tasks.remove(task);
+            taskDAO.delete(task.getId());
+            tasks = taskDAO.getAll();
             refreshColumns();
         });
         buttonBox.getChildren().add(deleteButton);
+
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 10px; ");
+        editButton.setOnAction(e ->{handleEditTask(task);});
+        buttonBox.getChildren().add(editButton);
 
         card.getChildren().addAll(titleLabel, descLabel, buttonBox);
 
         // Make card draggable
         setupDragSource(card, task);
+
+        card.setOnMouseClicked(e -> {openTaskDetails(task);});
 
         return card;
     }
@@ -275,11 +304,13 @@ public class PrimaryController {
                 for (Task task : tasks) {
                     if (task.getTitle().equals(taskTitle)) {
                         task.setStatus(targetStatus);
+                        taskDAO.update(task);
                         success = true;
                         break;
                     }
                 }
                 if (success) {
+                    tasks = taskDAO.getAll();
                     refreshColumns();
                 }
             }
@@ -287,4 +318,25 @@ public class PrimaryController {
             event.consume();
         });
     }
+
+    private void openTaskDetails(Task task) {
+        try {
+            Task fullTask = taskDAO.getByIdWithCollections(task.getId());
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDetailsView.fxml"));
+            Parent root = loader.load();
+
+            TaskDetailsController controller = loader.getController();
+            controller.setTask(fullTask); // Utiliser la tâche complète
+
+            Stage stage = new Stage();
+            stage.setTitle("Détails de la tâche - " + fullTask.getTitle());
+            stage.setScene(new Scene(root, 900, 800));
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

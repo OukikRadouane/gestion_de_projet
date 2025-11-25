@@ -1,6 +1,9 @@
 package com.gestionprojet.controller;
 
 import com.gestionprojet.model.*;
+import com.gestionprojet.model.Tasks.Priority;
+import com.gestionprojet.model.Tasks.Task;
+import com.gestionprojet.model.Tasks.TaskStatus;
 import dao.TaskDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -94,6 +97,7 @@ public class TaskDialogController {
             if( task == null){
                 task = new Task(name, description,  status, priority,deadline, assignee, sprint);
                 taskDAO.save(task);
+                System.out.println("✅ tache inséré avec succès !");
             }
             else {
                 task.setTitle(name);
@@ -104,8 +108,9 @@ public class TaskDialogController {
                 task.setAssignee(assignee);
                 task.setSprint(sprint);
                 taskDAO.update(task);
+                System.out.println("✅ tache modifié avec succès !");
             }
-            System.out.println("✅ tache insérés avec succès !");
+
             closeDialog();
     } catch (Exception e) {
         e.printStackTrace();
@@ -116,7 +121,6 @@ public class TaskDialogController {
     public void setTask(Task task) {
         this.task = task;
         if (task != null) {
-            titleText.setText("Modifier Tâche");
             taskNameField.setText(task.getTitle());
             descriptionField.setText(task.getDescription());
             priorityChoice.setValue(task.getPriority());

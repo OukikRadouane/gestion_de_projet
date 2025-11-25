@@ -1,27 +1,35 @@
 package com.gestionprojet.utils;
 
+import com.gestionprojet.model.Tasks.Comment;
+import com.gestionprojet.model.Tasks.Subtask;
+import com.gestionprojet.model.Tasks.Task;
+import com.gestionprojet.model.Tasks.TaskLog;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
 
-    // Instance unique de SessionFactory
     private static SessionFactory sessionFactory;
 
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
-                // Chargement du fichier de configuration hibernate.cfg.xml
-                sessionFactory = new Configuration().configure().buildSessionFactory();
+                Configuration configuration = new Configuration().configure();
+
+                configuration.addAnnotatedClass(Task.class);
+                configuration.addAnnotatedClass(Comment.class);
+                configuration.addAnnotatedClass(Subtask.class);
+                configuration.addAnnotatedClass(TaskLog.class);
+
+                sessionFactory = configuration.buildSessionFactory();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException("Erreur lors de la création de la SessionFactory : " + e.getMessage());
             }
         }
-        return sessionFactory; // ✅ ici on retourne bien quelque chose
+        return sessionFactory;
     }
 
-    // Pour fermer la SessionFactory proprement à la fin du programme
     public static void shutdown() {
         if (sessionFactory != null) {
             sessionFactory.close();
