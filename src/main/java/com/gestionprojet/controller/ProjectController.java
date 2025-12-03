@@ -2,7 +2,7 @@ package com.gestionprojet.controller;
 
 import com.gestionprojet.dao.ProjectDAO;
 import com.gestionprojet.model.Project;
-import com.gestionprojet.utils.SessionManager;
+import com.gestionprojet.service.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -25,7 +25,21 @@ public class ProjectController {
     private Label errorLabel;
 
     ProjectDAO projectDAO = new ProjectDAO();
-    Project project = new Project();
+
+    private Project project;
+    private DashboardController dashboardController;
+
+    public void setProject(Project project) {
+        this.project = project;
+        if (project != null) {
+            ProjectName.setText(project.getName());
+            ProjectDesc.setText(project.getDescription());
+        }
+    }
+
+    public void setDashboardController(DashboardController controller) {
+        this.dashboardController = controller;
+    }
     @FXML
     private void handleSave(){
         String name = ProjectName.getText().trim();
@@ -52,7 +66,7 @@ public class ProjectController {
                 project.setCreator(SessionManager.getInstance().getCurrentUser());
                 projectDAO.update(project);
             }
-            resetForm();
+            closeForm();
         }
         catch (Exception ex){
             ex.printStackTrace();

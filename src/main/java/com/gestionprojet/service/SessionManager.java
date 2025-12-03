@@ -1,14 +1,13 @@
-package com.gestionprojet.utils;
+package com.gestionprojet.service;
+
 
 import com.gestionprojet.model.User;
 
 public class SessionManager {
-
     private static SessionManager instance;
     private User currentUser;
 
-    private SessionManager() {
-    }
+    private SessionManager() {}
 
     public static SessionManager getInstance() {
         if (instance == null) {
@@ -30,6 +29,6 @@ public class SessionManager {
     }
 
     public void logout() {
-        currentUser = null;
+        this.currentUser = null;
     }
 }

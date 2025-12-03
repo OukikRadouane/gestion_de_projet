@@ -9,16 +9,13 @@ import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
 
-    // Instance unique de SessionFactory
     private static final SessionFactory sessionFactory = buildSessionFactory();
 
     private static SessionFactory buildSessionFactory() {
         try {
-            // Crée une configuration Hibernate à partir de hibernate.cfg.xml
             Configuration configuration = new Configuration();
             configuration.configure("hibernate.cfg.xml");
 
-            // Si besoin, on peut ajouter les classes annotées explicitement
             configuration.addAnnotatedClass(User.class);
             configuration.addAnnotatedClass(Project.class);
             configuration.addAnnotatedClass(Task.class);
@@ -30,12 +27,17 @@ public class HibernateUtil {
         }
     }
 
-    // Fournit une session Hibernate
+    // 👉 Getter officiel pour la SessionFactory
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    // 👉 Ouvrir une session
     public static Session getSession() {
         return sessionFactory.openSession();
     }
 
-    // Pour fermer la SessionFactory proprement à la fin du programme
+    // 👉 Fermeture propre
     public static void shutdown() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();

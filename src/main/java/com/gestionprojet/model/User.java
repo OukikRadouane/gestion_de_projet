@@ -1,48 +1,72 @@
 package com.gestionprojet.model;
 
-import lombok.*;
+import com.gestionprojet.model.enums.Role;
 import jakarta.persistence.*;
-import java.util.List;
+import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
-    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
-    private List<Project> projects;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-    public void getRole(String role) {
-        this.role = role;
-    }
-    // Constructeur personnalisé pour initialiser username et passwordHash
-    public User(String username, String passwordHash) {
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    // Constructeurs
+    public User() {}
+
+    public User(String username, String email, String passwordHash, Role role) {
         this.username = username;
-        this.passwordHash = passwordHash;
-    }
-
-    // Constructeur personnalisé complet (utile pour tests ou insertion manuelle)
-    public User(String username, String passwordHash, String role) {
-        this.username = username;
+        this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    // Getters
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public Role getRole() { return role; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setUsername(String username) { this.username = username; }
+    public void setEmail(String email) { this.email = email; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setRole(Role role) { this.role = role; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    // Callbacks JPA
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

@@ -1,6 +1,10 @@
 package com.gestionprojet;
 
-import com.gestionprojet.model.User;
+import com.gestionprojet.controller.AuthController;
+import com.gestionprojet.dao.ProjectDAO;
+import com.gestionprojet.dao.UserDAO;
+import com.gestionprojet.service.AuthService;
+import com.gestionprojet.utils.HibernateUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,70 +12,62 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 
 public class App extends Application {
 
+    private SessionFactory sessionFactory;
+    private Session session;
+
     @Override
-    public void start(Stage stage) throws Exception {
-        // Chemin correct vers le FXML dans resources
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/project.fxml"));
+    public void start(Stage primaryStage) throws Exception {
+
+        System.out.println("Démarrage de l'application...");
+
+        // Initialisation Hibernate
+        sessionFactory = HibernateUtil.getSessionFactory();
+        session = sessionFactory.openSession();
+
+        // DAO + Service
+        UserDAO userDao = new UserDAO();
+        ProjectDAO  projectDao = new ProjectDAO();
+        AuthService authService = new AuthService(userDao, projectDao);
+
+        // Charger la vue Login.fxml
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
         Parent root = loader.load();
 
+        // Injection du service dans le controller
+        AuthController controller = loader.getController();
+        controller.setAuthService(authService);
+
+        // Paramètres fenêtre
         Scene scene = new Scene(root);
-        stage.setTitle("Gestion de Projet");
-        stage.setScene(scene);
-        stage.show();
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(650);
+        primaryStage.setWidth(900);
+        primaryStage.setHeight(650);
+
+        primaryStage.setTitle("Project Manager - Connexion");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
+        primaryStage.centerOnScreen();
+        primaryStage.show();
+
+        System.out.println("Application démarrée avec succès");
+    }
+
+    @Override
+    public void stop() {
+        System.out.println("Arrêt de l'application...");
+        if (session != null && session.isOpen()) {
+            session.close();
+        }
+        if (sessionFactory != null && !sessionFactory.isClosed()) {
+            sessionFactory.close();
+        }
     }
 
     public static void main(String[] args) {
-        // ✅ Initialisation Hibernate
-        Configuration config = new Configuration()
-                .addAnnotatedClass(User.class)
-                .configure();
-
-        try (SessionFactory factory = config.buildSessionFactory()) {
-            try (Session session = factory.openSession()) {
-
-                Transaction transaction = session.beginTransaction();
-
-                // Utilisateurs à insérer
-                User[] users = {
-                        new User("oukik", "qwerty"),
-                        new User("radouane", "1234"),
-                        new User("Ali", "azerty"),
-                        new User("amin", "abcd")
-                };
-
-                String[] roles = {
-                        "Product Owner",
-                        "Scrum Master",
-                        "Developer 1",
-                        "Developer 2"
-                };
-
-                // Vérifie si l'utilisateur existe déjà avant insertion
-                for (int i = 0; i < users.length; i++) {
-                    User existingUser = session.createQuery(
-                                    "from User where username = :uname", User.class)
-                            .setParameter("uname", users[i].getUsername())
-                            .uniqueResult();
-
-                    if (existingUser == null) {
-                        users[i].setRole(roles[i]);
-                        session.persist(users[i]);
-                    }
-                }
-
-                transaction.commit();
-                System.out.println("✅ Utilisateurs insérés avec succès !");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Lancer l'application JavaFX
-        launch();
+        launch(args);
     }
 }
