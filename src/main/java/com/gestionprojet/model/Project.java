@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,8 +35,8 @@ public class Project {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    //@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    //private List<Sprint> sprints;
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sprint> sprints = new ArrayList<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -90,13 +92,13 @@ public class Project {
     public LocalDate getEndDate() {return endDate;}
     public void setEndDate(LocalDate endDate) {this.endDate = endDate;}
 
-    //public List<Sprint> getSprints() {
-    //    return sprints;
-    //}
+    public List<Sprint> getSprints() {
+        return sprints;
+    }
 
-    //public void setSprints(List<Sprint> sprints) {
-        //this.sprints = sprints;
-    //}
+    public void setSprints(List<Sprint> sprints) {
+        this.sprints = sprints;
+    }
 
 
    }

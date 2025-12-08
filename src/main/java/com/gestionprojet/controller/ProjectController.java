@@ -10,6 +10,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 public class ProjectController {
 
     @FXML
@@ -66,6 +68,7 @@ public class ProjectController {
                 project.setCreator(SessionManager.getInstance().getCurrentUser());
                 projectDAO.update(project);
             }
+            refreshDashboardProjects();
             closeForm();
         }
         catch (Exception ex){
@@ -90,5 +93,18 @@ public class ProjectController {
         ProjectEndDate.setValue(null);
         errorLabel.setVisible(false);
         project = null;
+    }
+
+    private void refreshDashboardProjects() {
+        if (dashboardController == null) {
+            return;
+        }
+        try {
+            List<Project> projects = projectDAO.getAllProjectsByUser(SessionManager.getInstance().getCurrentUser());
+            dashboardController.refreshProjects(projects);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // On ne bloque pas l'utilisateur; l'erreur sera visible dans la console
+        }
     }
 }

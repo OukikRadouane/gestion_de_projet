@@ -7,10 +7,10 @@
         <!-- Driver et URL -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="hibernate.connection.url">
-            jdbc:mysql://localhost:3306/gestionprojet?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true
+            jdbc:mysql://localhost:3307/gestion_projets?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true
         </property>
         <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">MySQL@ILHAM</property>
+        <property name="hibernate.connection.password">123456</property>
 
         <!-- Dialecte et options Hibernate -->
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
@@ -19,6 +19,7 @@
         <property name="hibernate.format_sql">true</property>
 
         <!-- Mapping des entités -->
+
         <mapping class="com.gestionprojet.model.User"/>
         <mapping class="com.gestionprojet.model.Project"/>
         <mapping class="com.gestionprojet.model.Sprint"/>
