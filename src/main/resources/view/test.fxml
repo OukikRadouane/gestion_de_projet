@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionprojet.controller.TaskDetailsController"
+      spacing="15.0">
+
+    <padding>
+        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+    </padding>
+
+    <style>
+        <String fx:value="-fx-background-color: #f8f9fa;"/>
+    </style>
+
+    <!-- En-tête -->
+    <Label fx:id="titleLabel">
+        <style>
+            <String fx:value="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        </style>
+    </Label>
+
+    <!-- Métadonnées de la tâche - Version simplifiée -->
+    <VBox spacing="10.0">
+        <!-- Statut -->
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Label text="Statut:" style="-fx-font-weight: bold; -fx-min-width: 80.0;"/>
+            <HBox spacing="5.0">
+                <Label fx:id="statusLabel" style="-fx-padding: 5px;"/>
+                <ComboBox fx:id="statusComboBox" visible="false"/>
+            </HBox>
+        </HBox>
+
+        <!-- Priorité -->
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Label text="Priorité:" style="-fx-font-weight: bold; -fx-min-width: 80.0;"/>
+            <HBox spacing="5.0">
+                <Label fx:id="priorityLabel" style="-fx-padding: 5px;"/>
+                <ComboBox fx:id="priorityComboBox" visible="false"/>
+            </HBox>
+        </HBox>
+
+        <!-- Assigné à -->
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Label text="Assigné à:" style="-fx-font-weight: bold; -fx-min-width: 80.0;"/>
+            <Label fx:id="assigneeLabel"/>
+        </HBox>
+
+        <!-- Échéance -->
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Label text="Échéance:" style="-fx-font-weight: bold; -fx-min-width: 80.0;"/>
+            <HBox spacing="5.0">
+                <Label fx:id="deadlineLabel"/>
+                <DatePicker fx:id="deadlinePicker" visible="false"/>
+            </HBox>
+        </HBox>
+    </VBox>
+
+    <!-- Description -->
+    <TitledPane text="Description" expanded="true">
+        <TextArea fx:id="descriptionArea" prefRowCount="4" wrapText="true"
+                  promptText="Décrivez cette tâche..."/>
+    </TitledPane>
+
+    <!-- Commentaires -->
+    <TitledPane text="Commentaires">
+        <VBox spacing="10.0">
+            <ListView fx:id="commentsList" prefHeight="120.0"/>
+            <HBox spacing="10.0">
+                <TextField fx:id="commentField" promptText="Ajouter un commentaire..." HBox.hgrow="ALWAYS"/>
+                <Button text="Ajouter" onAction="#handleAddComment"/>
+            </HBox>
+        </VBox>
+    </TitledPane>
+
+    <!-- Checklist -->
+    <TitledPane text="Checklist">
+        <VBox spacing="10.0">
+            <ListView fx:id="checklistList" prefHeight="100.0"/>
+            <HBox spacing="10.0">
+                <TextField fx:id="checklistField" promptText="Nouvel élément..." HBox.hgrow="ALWAYS"/>
+                <Button text="Ajouter" onAction="#handleAddChecklistItem"/>
+                <Button text="Supprimer" onAction="#handleDeleteChecklistItem">
+                    <style>
+                        <String fx:value="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                    </style>
+                </Button>
+            </HBox>
+        </VBox>
+    </TitledPane>
+
+    <!-- Pièces jointes -->
+    <TitledPane text="Pièces jointes">
+        <VBox spacing="10.0">
+            <ListView fx:id="attachmentList" prefHeight="100.0"/>
+            <HBox spacing="10.0">
+                <Button text="Ajouter une pièce jointe" onAction="#handleAddAttachment"/>
+                <Button text="Supprimer" onAction="#handleDeleteAttachment">
+                    <style>
+                        <String fx:value="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+                    </style>
+                </Button>
+            </HBox>
+        </VBox>
+    </TitledPane>
+
+    <!-- Historique -->
+    <TitledPane text="Historique des modifications">
+        <ListView fx:id="logsList" prefHeight="120.0"/>
+    </TitledPane>
+
+    <!-- Boutons d'action -->
+    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+        <Button text="Annuler" fx:id="cancelButton" onAction="#handleCancel">
+            <style>
+                <String fx:value="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+            </style>
+        </Button>
+        <Button text="Sauvegarder" fx:id="saveButton" onAction="#handleSave">
+            <style>
+                <String fx:value="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </style>
+        </Button>
+    </HBox>
+</VBox>

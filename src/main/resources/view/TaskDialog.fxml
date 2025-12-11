@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.gestionprojet.controller.TaskDialogController"
+      spacing="20"
+      prefHeight="600.0" prefWidth="500.0">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Ajouter une tâche" />
+
+    <VBox spacing="10">
+        <Label text="Nom de la tâche :"/>
+        <TextField fx:id="taskNameField"/>
+    </VBox>
+
+    <VBox spacing="10">
+        <Label text="Description :"/>
+        <TextArea fx:id="descriptionField" promptText="Description détaillée..."/>
+    </VBox>
+
+    <HBox spacing="30">
+        <VBox spacing="10">
+            <Label>Date limite :</Label>
+            <DatePicker fx:id="dueDatePicker" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;"/>
+        </VBox>
+        <VBox spacing="10">
+            <Label text="Assigné à :"/>
+            <ComboBox fx:id="assigneChoice" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
+
+        </VBox>
+    </HBox>
+
+    <HBox spacing="30">
+        <VBox spacing="10">
+            <Label text="Status :"/>
+            <ComboBox fx:id="statusChoice" prefWidth="200" style="-fx-background-color: white; -fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
+        </VBox>
+        <VBox spacing="10">
+            <Label text="Priorité :"/>
+            <ComboBox fx:id="priorityChoice" prefWidth="200" style="-fx-background-color: white;-fx-border-radius: 5;-fx-background-radius: 5;-fx-padding: 4;"/>
+        </VBox>
+    </HBox>
+    <Label fx:id="errorLabel" text="" style="-fx-text-fill: red;" visible="false"/>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <padding>
+            <Insets top="10" right="0" bottom="0" left="0"/>
+        </padding>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="secondary-button" prefWidth="100.0" style="-fx-background-color:#e74c3c; -fx-text-fill: white;"/>
+        <Button text="Enregistrer" onAction="#saveTask" styleClass="primary-button" prefWidth="100.0" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+    </HBox>
+
+</VBox>
+

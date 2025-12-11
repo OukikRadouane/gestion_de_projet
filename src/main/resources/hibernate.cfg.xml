@@ -11,7 +11,7 @@
         <mapping class="com.gestionprojet.model.User"/>
         <mapping class="com.gestionprojet.model.Project"/>
         <mapping class="com.gestionprojet.model.Sprint"/>
-        <mapping class="com.gestionprojet.model.Task"/>
+        <mapping class="com.gestionprojet.model.Tasks.Task"/>
 
 
     </session-factory>
