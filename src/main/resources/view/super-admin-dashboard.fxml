@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestionprojet.controller.SuperAdminDashboardController">
+   <children>
+      <!-- Barre de navigation -->
+      <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-background-color: #34495e; -fx-padding: 10 20;">
+         <children>
+            <Button text="Retour" onAction="#handleBack" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 5;" />
+            <Button text="Déconnexion" onAction="#handleLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 5;" />
+         </children>
+      </HBox>
+      
+      <!-- Header avec titre de bienvenue -->
+      <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #2c3e50; -fx-padding: 30;">
+         <children>
+            <Label fx:id="welcomeLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="Bienvenue Super Administrateur" />
+            <Label fx:id="roleLabel" style="-fx-font-size: 16px; -fx-text-fill: #ecf0f1;" text="SUPER_ADMIN" />
+         </children>
+      </VBox>
+      
+      <!-- Grille d'icônes de navigation -->
+      <GridPane alignment="CENTER" hgap="30.0" vgap="30.0" style="-fx-padding: 50;">
+         <children>
+            <!-- Gestion des utilisateurs -->
+            <VBox alignment="CENTER" spacing="10.0" style="-fx-cursor: hand; -fx-padding: 20; -fx-background-color: #3498db; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="0" onMouseClicked="#handleUserManagement">
+               <children>
+                  <Label style="-fx-font-size: 40px; -fx-text-fill: white;" text="👥" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Gestion des" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Utilisateurs" />
+               </children>
+            </VBox>
+            
+            <!-- Gestion des projets -->
+            <VBox alignment="CENTER" spacing="10.0" style="-fx-cursor: hand; -fx-padding: 20; -fx-background-color: #27ae60; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="0" onMouseClicked="#handleProjectManagement">
+               <children>
+                  <Label style="-fx-font-size: 40px; -fx-text-fill: white;" text="📁" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Gestion des" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Projets" />
+               </children>
+            </VBox>
+            
+            <!-- Rapports et statistiques -->
+            <VBox alignment="CENTER" spacing="10.0" style="-fx-cursor: hand; -fx-padding: 20; -fx-background-color: #e74c3c; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="1" onMouseClicked="#handleReports">
+               <children>
+                  <Label style="-fx-font-size: 40px; -fx-text-fill: white;" text="📈" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Rapports et" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Statistiques" />
+               </children>
+            </VBox>
+            
+            <!-- Configuration système -->
+            <VBox alignment="CENTER" spacing="10.0" style="-fx-cursor: hand; -fx-padding: 20; -fx-background-color: #9b59b6; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1" onMouseClicked="#handleSystemConfig">
+               <children>
+                  <Label style="-fx-font-size: 40px; -fx-text-fill: white;" text="⚙️" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Configuration" />
+                  <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;" text="Système" />
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
+      
+
+   </children>
+</VBox>

@@ -1,54 +1,73 @@
 package com.gestionprojet;
+
+import com.gestionprojet.controller.LoginController;
+import com.gestionprojet.dao.ProjectDAO;
+import com.gestionprojet.dao.UserDAO;
+import com.gestionprojet.service.AuthService;
+import com.gestionprojet.utils.HibernateUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.util.Objects;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 public class App extends Application {
-    public static void main(String[] args) {
-        launch();
-        /*
 
-        User user = new User();
-        user.setUsername("oukik");
-        user.setPasswordHash("qwerty");
-        user.setRole("Product Owner");
-        User user1 = new User();
-        user1.setUsername("radouane");
-        user1.setPasswordHash("1234");
-        user1.setRole("Scrum Master");
-        User user2 = new User();
-        user2.setUsername("Ali");
-        user2.setPasswordHash("azerty");
-        user2.setRole("Developper 1");
-        User user3 = new User();
-        user3.setUsername("amin");
-        user3.setPasswordHash("abcd");
-        user3.setRole("Developper 2");
+    private SessionFactory sessionFactory;
+    private Session session;
 
-        Configuration config = new Configuration()
-                .addAnnotatedClass(User.class)
-                .configure();
-        SessionFactory factory = config.buildSessionFactory();
-        Session session = factory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.persist(user);
-        session.persist(user1);
-        session.persist(user2);
-        session.persist(user3);
-        transaction.commit();
-         */
+    @Override
+    public void start(Stage primaryStage) throws Exception {
 
+        System.out.println("Démarrage de l'application...");
+
+        // Initialisation Hibernate
+        sessionFactory = HibernateUtil.getSessionFactory();
+        session = sessionFactory.openSession();
+
+        // DAO + Service
+        UserDAO userDao = new UserDAO();
+        ProjectDAO  projectDao = new ProjectDAO();
+        AuthService authService = new AuthService(userDao, projectDao);
+
+        // Charger la vue Login.fxml
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
+        Parent root = loader.load();
+
+        // Injection du service dans le controller
+        LoginController controller = loader.getController();
+        controller.setAuthService(authService);
+
+        // Paramètres fenêtre
+        Scene scene = new Scene(root);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(650);
+        primaryStage.setWidth(900);
+        primaryStage.setHeight(650);
+
+        primaryStage.setTitle("Project Manager - Connexion");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
+        primaryStage.centerOnScreen();
+        primaryStage.show();
+
+        System.out.println("Application démarrée avec succès");
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/signup.fxml")));
-        stage.setTitle("Login");
-        stage.setScene(new Scene(root,600,600));
-        stage.show();
+    public void stop() {
+        System.out.println("Arrêt de l'application...");
+        if (session != null && session.isOpen()) {
+            session.close();
+        }
+        if (sessionFactory != null && !sessionFactory.isClosed()) {
+            sessionFactory.close();
+        }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

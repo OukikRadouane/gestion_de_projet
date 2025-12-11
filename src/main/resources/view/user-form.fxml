@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestionprojet.controller.UserFormController"
+            style="-fx-background-color: #f1f5f9;" prefWidth="500" prefHeight="600">
+
+    <top>
+        <VBox style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, 2);">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+            <Label text="Informations Utilisateur"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 20px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane style="-fx-background-color: transparent; -fx-border-style: none;" fitToWidth="true">
+            <VBox spacing="20" style="-fx-background-color: #f1f5f9;">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30"/>
+                </padding>
+
+                <!-- Formulaire -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 2); -fx-padding: 25;">
+                    
+                    <!-- Nom et Prénom -->
+                    <HBox spacing="15">
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Prénom *"
+                                   style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                            <TextField fx:id="firstNameField" promptText="Entrez le prénom"
+                                       style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        </VBox>
+                        <VBox spacing="8" HBox.hgrow="ALWAYS">
+                            <Label text="Nom *"
+                                   style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                            <TextField fx:id="lastNameField" promptText="Entrez le nom"
+                                       style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Nom d'utilisateur -->
+                    <VBox spacing="8">
+                        <Label text="Nom d'utilisateur *"
+                               style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        <TextField fx:id="usernameField" promptText="Entrez le nom d'utilisateur"
+                                   style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <!-- Email -->
+                    <VBox spacing="8">
+                        <Label text="Adresse email *"
+                               style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        <TextField fx:id="emailField" promptText="exemple@email.com"
+                                   style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <!-- Mot de passe (uniquement en création) -->
+                    <VBox spacing="8">
+                        <Label fx:id="passwordLabel" text="Mot de passe *"
+                               style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        <PasswordField fx:id="passwordField" promptText="Minimum 6 caractères"
+                                       style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <VBox spacing="8">
+                        <Label fx:id="confirmPasswordLabel" text="Confirmer le mot de passe *"
+                               style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        <PasswordField fx:id="confirmPasswordField" promptText="Répétez le mot de passe"
+                                       style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <!-- Rôle -->
+                    <VBox spacing="8">
+                        <Label text="Rôle *"
+                               style="-fx-text-fill: #374151; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                        <ComboBox fx:id="roleComboBox" maxWidth="Infinity"
+                                  style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8 12; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <!-- Statut actif (uniquement en modification) -->
+                    <VBox spacing="8">
+                        <CheckBox fx:id="activeCheckBox" text="Utilisateur actif"
+                                  style="-fx-text-fill: #374151; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+                    </VBox>
+
+                    <Separator style="-fx-background-color: #e5e7eb;"/>
+
+                    <!-- Note -->
+                    <Label text="* Champs obligatoires"
+                           style="-fx-text-fill: #6b7280; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, -2);">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+            
+            <Button fx:id="cancelButton" text="Annuler" onAction="#handleCancel"
+                    style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-border-color: #d1d5db; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-font-weight: 500; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 10 20;"
+                    focusTraversable="false"/>
+            
+            <Button fx:id="saveButton" text="Enregistrer" onAction="#handleSave" disable="true"
+                    style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 6px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 10 20;"
+                    focusTraversable="false"/>
+        </HBox>
+    </bottom>
+</BorderPane>
