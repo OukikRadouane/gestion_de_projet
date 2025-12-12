@@ -4,7 +4,7 @@ import com.gestionprojet.model.*;
 import com.gestionprojet.model.Tasks.Priority;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
-import dao.TaskDAO;
+import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;

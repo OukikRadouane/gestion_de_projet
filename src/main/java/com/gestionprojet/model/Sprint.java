@@ -1,5 +1,5 @@
 package com.gestionprojet.model;
-
+import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.enums.SprintStatus;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -49,6 +49,9 @@ public class Sprint {
     }
 
     // Méthode utilitaire pour calculer la durée en jours
+    public Long getId() {
+        return id;
+    }
     public long getDurationInDays() {
         if (startDate != null && endDate != null) {
             return java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;

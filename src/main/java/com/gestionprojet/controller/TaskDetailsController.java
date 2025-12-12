@@ -1,7 +1,7 @@
 package com.gestionprojet.controller;
 
 import com.gestionprojet.model.Tasks.*;
-import dao.TaskDAO;
+import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;

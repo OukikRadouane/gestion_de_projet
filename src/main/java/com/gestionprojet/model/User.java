@@ -69,4 +69,10 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public boolean isEmpty() {
+        return (username == null || username.trim().isEmpty()) &&
+                (email == null || email.trim().isEmpty()) &&
+                (passwordHash == null || passwordHash.trim().isEmpty());
+    }
 }

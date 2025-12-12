@@ -1,5 +1,6 @@
-package dao;
+package com.gestionprojet.dao;
 
+import com.gestionprojet.model.Project;
 import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.Tasks.*;
 import com.gestionprojet.utils.HibernateUtil;
@@ -83,6 +84,22 @@ public class TaskDAO {
         }
 
     }
+
+    public List<Task> getByProject(Project project) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            return session.createQuery(
+                            "Select t From Task t Where t.sprint.project = :project Order By t.priority DESC, t.deadline",
+                            Task.class
+                    )
+                    .setParameter("project", project)
+                    .getResultList();
+        } finally {
+            session.close();
+        }
+    }
+
+
     public List<Task> getBySprintAndStatus(Sprint sprint , TaskStatus status) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {

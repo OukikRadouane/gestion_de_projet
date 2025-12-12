@@ -1,9 +1,14 @@
 package com.gestionprojet.controller;
-
+import com.gestionprojet.controller.kanbanController;
 import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.enums.SprintStatus;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 public class SprintCardController {
 
@@ -107,5 +112,31 @@ public class SprintCardController {
             sprintsViewController.deleteSprint(currentSprint);
         }
     }
+
+    @FXML
+    private void handleManageTasks() {
+        if (currentSprint == null || currentSprint.getProject() == null) {
+            return;
+        }
+
+        try {
+            // Créer le controller Kanban
+            kanbanController kanban = new kanbanController();
+            BorderPane kanbanView = kanban.createView();
+            kanban.setSprint(currentSprint);
+
+            Stage stage = new Stage();
+            stage.setTitle("Tableau Kanban - " + currentSprint.getProject().getName());
+            stage.setScene(new Scene(kanbanView, 1200, 750));
+            stage.setResizable(true);
+            stage.show();
+
+        } catch (Exception e) {
+            System.err.println("Erreur ouverture tableau Kanban: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
 }
 

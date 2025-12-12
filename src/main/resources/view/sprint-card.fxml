@@ -76,6 +76,9 @@
         <Button text="Supprimer" onAction="#handleDelete"
                 style="-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 6 12; -fx-border-radius: 6px; -fx-border-color: #ef4444; -fx-border-width: 1px;"
                 focusTraversable="false"/>
+        <Button text="Tasks" onAction="#handleManageTasks"
+                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 6 12; -fx-border-radius: 6px;"
+                focusTraversable="false"/>
     </HBox>
 </VBox>
 

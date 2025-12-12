@@ -1,8 +1,11 @@
 package com.gestionprojet.controller;
 
+import com.gestionprojet.model.Project;
+import com.gestionprojet.model.Sprint;
+import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
-import dao.TaskDAO;
+import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,29 +26,46 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-
-public class PrimaryController {
+public class kanbanController {
 
     private VBox todoColumn;
     private VBox doingColumn;
     private VBox doneColumn;
     private Button addTaskButton;
     private BorderPane root;
+    private Sprint sprint;
+    private User user;
+    private Project project;
+    private List<Task> tasks;
 
-    private List<Task> tasks ;
+    private final TaskDAO taskDAO = new TaskDAO();
 
-    private  final TaskDAO taskDAO = new TaskDAO();
+    public kanbanController() {
+        this.tasks = new ArrayList<>();
+    }
 
-    public PrimaryController() {
-        tasks = taskDAO.getAll();
-        System.out.println("Nombre de tâches chargées : " + tasks.size()); // ← Ajoutez ce debug
-        for (Task task : tasks) {
-            System.out.println("Tâche : " + task.getTitle() + " - Statut : " + task.getStatus());
+    private void loadTasksForSprint() {
+        if (sprint != null) {
+            tasks = taskDAO.getBySprint(sprint);
+            System.out.println("Chargement des tâches pour le sprint: " + sprint.getName() + ", nombre de tâches: " + tasks.size());
+        } else {
+            tasks = new ArrayList<>();
+            System.out.println("Aucun sprint défini, liste de tâches vide");
+        }
+
+        if (todoColumn != null && doingColumn != null && doneColumn != null) {
+            refreshColumns();
         }
     }
 
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+        System.out.println("Sprint défini dans kanbanController: " + (sprint != null ? sprint.getName() : "null"));
+        loadTasksForSprint();
+    }
 
     public BorderPane createView() {
         root = new BorderPane();
@@ -63,8 +83,7 @@ public class PrimaryController {
         setupDropTarget(doingColumn, TaskStatus.DOING);
         setupDropTarget(doneColumn, TaskStatus.DONE);
 
-        refreshColumns();
-
+        // Ne pas appeler refreshColumns ici, attendre que le sprint soit défini
         return root;
     }
 
@@ -76,6 +95,14 @@ public class PrimaryController {
         Label titleLabel = new Label("Kanban Board");
         titleLabel.setTextFill(Color.WHITE);
         titleLabel.setFont(Font.font("System Bold", 24));
+
+        // Afficher le nom du sprint si disponible
+        if (sprint != null) {
+            Label sprintLabel = new Label("Sprint: " + sprint.getName());
+            sprintLabel.setTextFill(Color.LIGHTGRAY);
+            sprintLabel.setFont(Font.font("System", 14));
+            topBar.getChildren().add(sprintLabel);
+        }
 
         HBox buttonContainer = new HBox(10);
         buttonContainer.setAlignment(Pos.CENTER_LEFT);
@@ -164,18 +191,19 @@ public class PrimaryController {
 
             TaskDialogController dialogController = loader.getController();
 
-            dialogController.setSprint(null);
+            // Passer le sprint actuel à la boîte de dialogue
+            dialogController.setSprint(sprint);
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
 
-            Task newTask = dialogController.getTask();
-            if (newTask != null) {
-                tasks = taskDAO.getAll();
-                refreshColumns();
-            }
+            // Recharger les tâches après ajout
+            loadTasksForSprint();
 
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Erreur lors de l'ouverture de la boîte de dialogue d'ajout de tâche");
         }
     }
 
@@ -188,33 +216,70 @@ public class PrimaryController {
             Parent root = loader.load();
 
             TaskDialogController dialogController = loader.getController();
-            dialogController.setTask(task); // ← Initialiser avec la tâche existante
-            dialogController.setSprint(null);
+            dialogController.setTask(task);
+            dialogController.setSprint(sprint); // Passer le sprint actuel
 
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
 
-            // Rafraîchir après édition
-            tasks = taskDAO.getAll();
-            refreshColumns();
+            // Recharger les tâches après édition
+            loadTasksForSprint();
 
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Erreur lors de l'ouverture de la boîte de dialogue de modification de tâche");
         }
     }
 
     private void refreshColumns() {
+        // Vérifier que les colonnes existent
+        if (todoColumn == null || doingColumn == null || doneColumn == null) {
+            System.err.println("Les colonnes ne sont pas initialisées");
+            return;
+        }
+
+        // Vider les colonnes
         todoColumn.getChildren().clear();
         doingColumn.getChildren().clear();
         doneColumn.getChildren().clear();
 
+        // Vérifier que tasks n'est pas null
+        if (tasks == null) {
+            System.err.println("La liste des tâches est null");
+            tasks = new ArrayList<>();
+        }
+
+        System.out.println("Rafraîchissement des colonnes avec " + tasks.size() + " tâches");
+
+        // Ajouter les tâches aux colonnes appropriées
         for (Task task : tasks) {
-            VBox taskCard = createTaskCard(task);
-            switch (task.getStatus()) {
-                case TO_DO -> todoColumn.getChildren().add(taskCard);
-                case DOING -> doingColumn.getChildren().add(taskCard);
-                case DONE -> doneColumn.getChildren().add(taskCard);
+            try {
+                VBox taskCard = createTaskCard(task);
+                TaskStatus status = task.getStatus();
+
+                if (status == null) {
+                    status = TaskStatus.TO_DO; // Valeur par défaut
+                }
+
+                switch (status) {
+                    case TO_DO -> todoColumn.getChildren().add(taskCard);
+                    case DOING -> doingColumn.getChildren().add(taskCard);
+                    case DONE -> doneColumn.getChildren().add(taskCard);
+                    default -> todoColumn.getChildren().add(taskCard);
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la création de la carte pour la tâche: " + task.getTitle());
+                e.printStackTrace();
             }
+        }
+
+        // Afficher un message si aucune tâche
+        if (tasks.isEmpty()) {
+            Label emptyLabel = new Label("Aucune tâche pour ce sprint");
+            emptyLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-style: italic;");
+            todoColumn.getChildren().add(emptyLabel);
         }
     }
 
@@ -227,34 +292,42 @@ public class PrimaryController {
         titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #000000");
         titleLabel.setWrapText(true);
 
-        Label descLabel = new Label(task.getDescription());
+        Label descLabel = new Label(task.getDescription() != null ? task.getDescription() : "");
         descLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12px;");
         descLabel.setWrapText(true);
+
 
         // Action buttons
         HBox buttonBox = new HBox(8);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button("Supprimer");
         deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px;");
         deleteButton.setOnAction(e -> {
-            taskDAO.delete(task.getId());
-            tasks = taskDAO.getAll();
-            refreshColumns();
+            try {
+                taskDAO.delete(task.getId());
+                loadTasksForSprint(); // Recharger après suppression
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                System.err.println("Erreur lors de la suppression de la tâche");
+            }
         });
-        buttonBox.getChildren().add(deleteButton);
 
-        Button editButton = new Button("Edit");
-        editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 10px; ");
-        editButton.setOnAction(e ->{handleEditTask(task);});
-        buttonBox.getChildren().add(editButton);
+        Button editButton = new Button("Modifier");
+        editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 10px;");
+        editButton.setOnAction(e -> handleEditTask(task));
 
+        buttonBox.getChildren().addAll(editButton, deleteButton);
         card.getChildren().addAll(titleLabel, descLabel, buttonBox);
 
         // Make card draggable
         setupDragSource(card, task);
 
-        card.setOnMouseClicked(e -> {openTaskDetails(task);});
+        card.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) { // Double-clic pour ouvrir les détails
+                openTaskDetails(task);
+            }
+        });
 
         return card;
     }
@@ -263,7 +336,7 @@ public class PrimaryController {
         card.setOnDragDetected(event -> {
             Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent content = new ClipboardContent();
-            content.putString(task.getTitle()); // Use title as identifier
+            content.putString(String.valueOf(task.getId())); // Utiliser l'ID comme identifiant
             dragboard.setContent(content);
             card.setOpacity(0.5);
             event.consume();
@@ -275,7 +348,7 @@ public class PrimaryController {
         });
     }
 
-    private void setupDropTarget(VBox column,TaskStatus targetStatus) {
+    private void setupDropTarget(VBox column, TaskStatus targetStatus) {
         column.setOnDragOver(event -> {
             if (event.getGestureSource() != column && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
@@ -298,22 +371,37 @@ public class PrimaryController {
         column.setOnDragDropped(event -> {
             Dragboard dragboard = event.getDragboard();
             boolean success = false;
+
             if (dragboard.hasString()) {
-                String taskTitle = dragboard.getString();
-                // Find the task by title and update its status
-                for (Task task : tasks) {
-                    if (task.getTitle().equals(taskTitle)) {
-                        task.setStatus(targetStatus);
-                        taskDAO.update(task);
-                        success = true;
-                        break;
+                try {
+                    long taskId = Long.parseLong(dragboard.getString());
+
+                    // Trouver la tâche par ID
+                    for (Task task : tasks) {
+                        if (task.getId() == taskId) {
+                            // Mettre à jour le statut
+                            task.setStatus(targetStatus);
+
+                            // Sauvegarder en base de données
+                            taskDAO.update(task);
+
+                            success = true;
+                            break;
+                        }
                     }
-                }
-                if (success) {
-                    tasks = taskDAO.getAll();
-                    refreshColumns();
+
+                    if (success) {
+                        // Recharger les tâches pour refléter le changement
+                        loadTasksForSprint();
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Erreur de format de l'ID de tâche: " + dragboard.getString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Erreur lors de la mise à jour du statut de la tâche");
                 }
             }
+
             event.setDropCompleted(success);
             event.consume();
         });
@@ -321,13 +409,14 @@ public class PrimaryController {
 
     private void openTaskDetails(Task task) {
         try {
+            // Récupérer la tâche complète avec ses collections
             Task fullTask = taskDAO.getByIdWithCollections(task.getId());
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDetailsView.fxml"));
             Parent root = loader.load();
 
             TaskDetailsController controller = loader.getController();
-            controller.setTask(fullTask); // Utiliser la tâche complète
+            controller.setTask(fullTask);
 
             Stage stage = new Stage();
             stage.setTitle("Détails de la tâche - " + fullTask.getTitle());
@@ -336,7 +425,27 @@ public class PrimaryController {
             stage.show();
         } catch (Exception ex) {
             ex.printStackTrace();
+            System.err.println("Erreur lors de l'ouverture des détails de la tâche");
         }
     }
 
+    // Méthode pour charger les tâches par projet (optionnel)
+    public void loadTasksByProject(Long projectId) {
+        if (projectId != null) {
+            tasks = taskDAO.getByProject(project);
+        } else {
+            tasks = new ArrayList<>();
+        }
+
+        if (todoColumn != null && doingColumn != null && doneColumn != null) {
+            refreshColumns();
+        }
+    }
+
+    // Méthode pour réinitialiser le contrôleur
+    public void reset() {
+        this.sprint = null;
+        this.tasks = new ArrayList<>();
+        refreshColumns();
+    }
 }
