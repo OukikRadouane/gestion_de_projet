@@ -12,23 +12,39 @@ import javafx.geometry.Pos;
 
 public class TaskDetailsController {
 
-    @FXML private Label titleLabel;
-    @FXML private Label statusLabel;
-    @FXML private Label priorityLabel;
-    @FXML private Label assigneeLabel;
-    @FXML private Label sprintLabel;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Label priorityLabel;
+    @FXML
+    private Label assigneeLabel;
+    @FXML
+    private Label sprintLabel;
 
-    @FXML private TextArea descriptionArea;
-    @FXML private VBox subtasksContainer;
-    @FXML private VBox commentsContainer;
-    @FXML private TextField newCommentField;
-    @FXML private TextArea logsArea;
-    @FXML private TextField newSubtaskField;
+    @FXML
+    private TextArea descriptionArea;
+    @FXML
+    private VBox subtasksContainer;
+    @FXML
+    private VBox commentsContainer;
+    @FXML
+    private TextField newCommentField;
+    @FXML
+    private TextArea logsArea;
+    @FXML
+    private TextField newSubtaskField;
 
     private Subtask selectedSubtask = null;
     private Comment selectedComment = null;
     private Task task;
     private final TaskDAO taskDAO = new TaskDAO();
+    private com.gestionprojet.model.User currentUser;
+
+    public void setCurrentUser(com.gestionprojet.model.User user) {
+        this.currentUser = user;
+    }
 
     public void setTask(Task task) {
         this.task = task;
@@ -65,6 +81,7 @@ public class TaskDetailsController {
 
         CheckBox checkBox = new CheckBox(subtask.getTitle());
         checkBox.setSelected(subtask.isDone());
+        checkBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(checkBox, Priority.ALWAYS);
 
         updateSubtaskStyle(checkBox, subtask.isDone());
@@ -73,10 +90,8 @@ public class TaskDetailsController {
             subtask.setDone(newValue);
             updateSubtaskStyle(checkBox, newValue);
 
-            task.addLog(newValue ?
-                    "Sous-tâche terminée: " + subtask.getTitle() :
-                    "Sous-tâche réouverte: " + subtask.getTitle()
-            );
+            task.addLog(newValue ? "Sous-tâche terminée: " + subtask.getTitle()
+                    : "Sous-tâche réouverte: " + subtask.getTitle(), currentUser);
 
             saveTask();
             refreshLogs();
@@ -90,6 +105,32 @@ public class TaskDetailsController {
 
         subtaskBox.getChildren().addAll(checkBox);
         return subtaskBox;
+    }
+
+    private void deleteSubtask(Subtask subtask) {
+        if (!confirm("Supprimer la sous-tâche",
+                "Êtes-vous sûr de vouloir supprimer la sous-tâche : " + subtask.getTitle() + " ?")) {
+            return;
+        }
+
+        try {
+            String subtaskTitle = subtask.getTitle();
+
+            // Supprimer de la liste en mémoire (orphanRemoval s'occupera de la suppression
+            // en base)
+            task.removeSubtask(subtask);
+
+            loadSubtasks();
+            task.addLog("Sous-tâche supprimée: " + subtaskTitle, currentUser);
+            refreshLogs();
+            clearSubtaskSelection();
+
+            // Sauvegarder pour mettre à jour l'état
+            saveTask();
+        } catch (Exception e) {
+            showAlert("Erreur", "Erreur lors de la suppression de la sous-tâche: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void clearSubtaskSelection() {
@@ -121,7 +162,8 @@ public class TaskDetailsController {
         commentBox.setAlignment(Pos.CENTER_LEFT);
         commentBox.setStyle("-fx-padding: 5;");
 
-        Label label = new Label(comment.getText());
+        String authorName = comment.getAuthor() != null ? comment.getAuthor().getUsername() : "Inconnu";
+        Label label = new Label(authorName + ": " + comment.getText());
         label.setWrapText(true);
         label.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(label, Priority.ALWAYS);
@@ -163,13 +205,13 @@ public class TaskDetailsController {
             saveTask();
             loadSubtasks();
 
-            task.addLog("Sous-tâche ajoutée: " + title);
+            task.addLog("Sous-tâche ajoutée: " + title, currentUser);
             refreshLogs();
 
             newSubtaskField.clear();
             clearSubtaskSelection();
         } catch (Exception e) {
-            showAlert("Erreur", "Erreur lors de l'ajout de la sous-tâche: " + e.getMessage());
+            showAlert("Erreur", "Erreur lors de l'ajout du sous-tâche: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -180,27 +222,7 @@ public class TaskDetailsController {
             showAlert("Erreur", "Veuillez sélectionner une sous-tâche à supprimer");
             return;
         }
-
-        if (!confirm("Supprimer la sous-tâche", "Êtes-vous sûr de vouloir supprimer la sous-tâche : " + selectedSubtask.getTitle() + " ?")) {
-            return;
-        }
-
-        try {
-            String subtaskTitle = selectedSubtask.getTitle();
-
-            // Supprimer de la base de données d'abord
-            taskDAO.deleteSubtask(selectedSubtask);
-            // Puis supprimer de la liste en mémoire
-            task.removeSubtask(selectedSubtask);
-
-            loadSubtasks();
-            task.addLog("Sous-tâche supprimée: " + subtaskTitle);
-            refreshLogs();
-            clearSubtaskSelection();
-        } catch (Exception e) {
-            showAlert("Erreur", "Erreur lors de la suppression de la sous-tâche: " + e.getMessage());
-            e.printStackTrace();
-        }
+        deleteSubtask(selectedSubtask);
     }
 
     @FXML
@@ -215,13 +237,14 @@ public class TaskDetailsController {
             Comment comment = new Comment();
             comment.setText(content);
             comment.setTask(task); // Important: lier le commentaire à la tâche
+            comment.setAuthor(currentUser);
 
             task.addComment(comment);
 
             saveTask();
             loadComments();
 
-            task.addLog("Commentaire ajouté");
+            task.addLog("Commentaire ajouté", currentUser);
             refreshLogs();
 
             newCommentField.clear();
@@ -244,15 +267,17 @@ public class TaskDetailsController {
         }
 
         try {
-            // Supprimer de la base de données d'abord
-            taskDAO.deleteComment(selectedComment);
-            // Puis supprimer de la liste en mémoire
+            // Supprimer de la liste en mémoire (orphanRemoval s'occupera de la suppression
+            // en base)
             task.removeComment(selectedComment);
 
             loadComments();
-            task.addLog("Commentaire supprimé");
+            task.addLog("Commentaire supprimé", currentUser);
             refreshLogs();
             clearCommentSelection();
+
+            // Sauvegarder pour mettre à jour l'état
+            saveTask();
         } catch (Exception e) {
             showAlert("Erreur", "Erreur lors de la suppression du commentaire: " + e.getMessage());
             e.printStackTrace();
@@ -279,14 +304,17 @@ public class TaskDetailsController {
     private void refreshLogs() {
         StringBuilder sb = new StringBuilder();
         for (TaskLog log : task.getLogs()) {
-            sb.append(log.getMessage()).append("\n");
+            String userName = log.getUser() != null ? log.getUser().getUsername() : "Système";
+            sb.append("[").append(log.getTimestamp()).append("] ")
+                    .append(userName).append(": ")
+                    .append(log.getMessage()).append("\n");
         }
         logsArea.setText(sb.toString());
     }
 
     private void saveTask() {
         try {
-            taskDAO.save(task);
+            this.task = taskDAO.save(task);
         } catch (Exception e) {
             showAlert("Erreur de sauvegarde", "Erreur lors de la sauvegarde: " + e.getMessage());
             e.printStackTrace();
@@ -304,6 +332,5 @@ public class TaskDetailsController {
             e.printStackTrace();
         }
     }
-
 
 }

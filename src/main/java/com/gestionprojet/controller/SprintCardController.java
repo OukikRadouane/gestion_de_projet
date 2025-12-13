@@ -1,4 +1,5 @@
 package com.gestionprojet.controller;
+
 import com.gestionprojet.controller.kanbanController;
 import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.enums.SprintStatus;
@@ -37,10 +38,10 @@ public class SprintCardController {
         sprintNameLabel.setText(sprint.getName());
         startDateLabel.setText(formatDate(sprint.getStartDate()));
         endDateLabel.setText(formatDate(sprint.getEndDate()));
-        
+
         long days = sprint.getDurationInDays();
         durationLabel.setText(days + " jour(s)");
-        
+
         if (sprint.getGoal() != null && !sprint.getGoal().trim().isEmpty()) {
             goalLabel.setText(sprint.getGoal());
         } else {
@@ -54,8 +55,9 @@ public class SprintCardController {
     private void updateStatus(Sprint sprint) {
         SprintStatus status = sprint.getStatus();
         String statusText = status.getLabel();
-        
-        // Mettre à jour le statut si nécessaire (sprint actif ou terminé basé sur les dates)
+
+        // Mettre à jour le statut si nécessaire (sprint actif ou terminé basé sur les
+        // dates)
         if (sprint.isActive() && status != SprintStatus.ACTIVE) {
             statusText = "Actif";
             statusLabel.setStyle("-fx-text-fill: white; -fx-font-weight: 600; -fx-font-size: 11px; " +
@@ -90,12 +92,13 @@ public class SprintCardController {
                     break;
             }
         }
-        
+
         statusLabel.setText(statusText);
     }
 
     private String formatDate(java.time.LocalDate date) {
-        if (date == null) return "Non défini";
+        if (date == null)
+            return "Non défini";
         return date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
@@ -122,6 +125,9 @@ public class SprintCardController {
         try {
             // Créer le controller Kanban
             kanbanController kanban = new kanbanController();
+            if (sprintsViewController != null) {
+                kanban.setUser(sprintsViewController.getCurrentUser());
+            }
             BorderPane kanbanView = kanban.createView();
             kanban.setSprint(currentSprint);
 
@@ -137,6 +143,4 @@ public class SprintCardController {
         }
     }
 
-
 }
-

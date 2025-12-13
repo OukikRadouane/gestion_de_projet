@@ -1,4 +1,5 @@
 package com.gestionprojet.model;
+
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.enums.SprintStatus;
 import jakarta.persistence.*;
@@ -52,6 +53,7 @@ public class Sprint {
     public Long getId() {
         return id;
     }
+
     public long getDurationInDays() {
         if (startDate != null && endDate != null) {
             return java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
@@ -70,7 +72,63 @@ public class Sprint {
 
     // Méthode pour vérifier si le sprint est terminé
     public boolean isCompleted() {
-        return status == SprintStatus.COMPLETED || 
-               (endDate != null && endDate.isBefore(LocalDate.now()) && status != SprintStatus.CANCELLED);
+        return status == SprintStatus.COMPLETED ||
+                (endDate != null && endDate.isBefore(LocalDate.now()) && status != SprintStatus.CANCELLED);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getGoal() {
+        return goal;
+    }
+
+    public void setGoal(String goal) {
+        this.goal = goal;
+    }
+
+    public SprintStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SprintStatus status) {
+        this.status = status;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 }

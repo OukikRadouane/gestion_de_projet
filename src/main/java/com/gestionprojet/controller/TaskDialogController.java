@@ -13,18 +13,26 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 
 public class TaskDialogController {
-    @FXML private Text titleText;
-    @FXML private TextField taskNameField;
-    @FXML private TextArea descriptionField;
-    @FXML private DatePicker dueDatePicker;
-    @FXML private ComboBox<TaskStatus> statusChoice;
-    @FXML private ComboBox<Priority>  priorityChoice;
-    @FXML private ComboBox<User> assigneChoice;
+    @FXML
+    private Text titleText;
+    @FXML
+    private TextField taskNameField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private DatePicker dueDatePicker;
+    @FXML
+    private ComboBox<TaskStatus> statusChoice;
+    @FXML
+    private ComboBox<Priority> priorityChoice;
 
-    @FXML private Label errorLabel;
+    @FXML
+    private ComboBox<User> assigneChoice;
+    @FXML
+    private Label errorLabel;
 
-    private  final TaskDAO taskDAO = new TaskDAO();
-    //private final UserDAO userDAO = new UserDAO();
+    private final TaskDAO taskDAO = new TaskDAO();
+    private final com.gestionprojet.dao.UserDAO userDAO = new com.gestionprojet.dao.UserDAO();
     private Sprint sprint;
     private Task task;
 
@@ -66,40 +74,78 @@ public class TaskDialogController {
             }
         });
 
+        // Initialiser le sélecteur d'utilisateurs
+        assigneChoice.getItems().addAll(userDAO.findAll());
 
+        // Définir comment afficher les utilisateurs dans la liste déroulante
+        javafx.util.StringConverter<User> userConverter = new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(User user) {
+                return user != null ? user.getUsername() : "";
+            }
+
+            @Override
+            public User fromString(String string) {
+                return null; // Pas nécessaire pour la sélection
+            }
+        };
+
+        assigneChoice.setConverter(userConverter);
+
+        // Définir l'affichage des cellules (liste déroulante ouverte)
+        assigneChoice.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                setText(empty || user == null ? "" : user.getUsername());
+            }
+        });
+
+        // Définir l'affichage du bouton (valeur sélectionnée)
+        assigneChoice.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                setText(empty || user == null ? "" : user.getUsername());
+            }
+        });
 
         dueDatePicker.setValue(LocalDate.now().plusDays(7));
     }
 
+    private com.gestionprojet.model.User currentUser;
 
+    public void setCurrentUser(com.gestionprojet.model.User user) {
+        this.currentUser = user;
+    }
 
-    public void saveTask(){
+    public void saveTask() {
         String name = taskNameField.getText();
         String description = descriptionField.getText();
         LocalDate deadline = dueDatePicker.getValue();
-        TaskStatus  status = statusChoice.getValue();
+        TaskStatus status = statusChoice.getValue();
         Priority priority = priorityChoice.getValue();
         User assignee = assigneChoice.getValue();
 
-        if (name.isEmpty()){
+        if (name.isEmpty()) {
             showError("Le nom de la tâche est requis");
             return;
         }
-        if (status == null){
+        if (status == null) {
             showError("Le status est requis");
             return;
         }
-        if (priority == null){
+        if (priority == null) {
             showError("La priority est requis");
             return;
         }
         try {
-            if( task == null){
-                task = new Task(name, description,  status, priority,deadline, assignee, sprint);
+            if (task == null) {
+                task = new Task(name, description, status, priority, deadline, assignee, sprint);
+                task.addLog("Tâche créée", currentUser);
                 taskDAO.save(task);
                 System.out.println("✅ tache inséré avec succès !");
-            }
-            else {
+            } else {
                 task.setTitle(name);
                 task.setDescription(description);
                 task.setStatus(status);
@@ -107,15 +153,16 @@ public class TaskDialogController {
                 task.setDeadline(deadline);
                 task.setAssignee(assignee);
                 task.setSprint(sprint);
+                task.addLog("Tâche modifiée", currentUser);
                 taskDAO.update(task);
                 System.out.println("✅ tache modifié avec succès !");
             }
 
             closeDialog();
-    } catch (Exception e) {
-        e.printStackTrace();
-        showError("Erreur lors de l'enregistrement de la tâche");
-    }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur lors de l'enregistrement de la tâche");
+        }
     }
 
     public void setTask(Task task) {
@@ -130,7 +177,7 @@ public class TaskDialogController {
         }
     }
 
-    public void showError(String message){
+    public void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
     }
@@ -145,13 +192,13 @@ public class TaskDialogController {
         Stage stage = (Stage) taskNameField.getScene().getWindow();
         stage.close();
     }
+
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
     }
+
     public Task getTask() {
         return task;
     }
-
-
 
 }

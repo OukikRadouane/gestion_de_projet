@@ -43,6 +43,10 @@ public class SprintsViewController {
         this.dashboardController = controller;
     }
 
+    public com.gestionprojet.model.User getCurrentUser() {
+        return dashboardController != null ? dashboardController.getCurrentUser() : null;
+    }
+
     public void loadSprints() {
         if (sprintsGrid == null || project == null) {
             return;
@@ -170,4 +174,3 @@ public class SprintsViewController {
         alert.showAndWait();
     }
 }
-

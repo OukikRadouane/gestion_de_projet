@@ -19,17 +19,28 @@ import java.io.IOException;
 import java.util.List;
 
 public class DashboardController {
-    @FXML private Label welcomeLabel;
-    @FXML private Label usernameLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label roleLabel;
-    @FXML private Label currentUserLabel;
-    @FXML private Label currentRoleLabel;
-    @FXML private Label projectsCountLabel;
-    @FXML private Label collaboratorsCountLabel;
-    @FXML private Label tasksCountLabel;
-    @FXML private GridPane projectsGrid;
-    @FXML private VBox emptyStateContainer;
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private Label emailLabel;
+    @FXML
+    private Label roleLabel;
+    @FXML
+    private Label currentUserLabel;
+    @FXML
+    private Label currentRoleLabel;
+    @FXML
+    private Label projectsCountLabel;
+    @FXML
+    private Label collaboratorsCountLabel;
+    @FXML
+    private Label tasksCountLabel;
+    @FXML
+    private GridPane projectsGrid;
+    @FXML
+    private VBox emptyStateContainer;
 
     private AuthService authService;
     private List<Project> projects;
@@ -40,12 +51,19 @@ public class DashboardController {
         loadUserInfo();
     }
 
+    public User getCurrentUser() {
+        return authService != null ? authService.getCurrentUser() : null;
+    }
+
     @FXML
     public void initialize() {
         System.out.println("DashboardController initialisé");
-        if (projectsCountLabel != null) projectsCountLabel.setText("0");
-        if (collaboratorsCountLabel != null) collaboratorsCountLabel.setText("0");
-        if (tasksCountLabel != null) tasksCountLabel.setText("0");
+        if (projectsCountLabel != null)
+            projectsCountLabel.setText("0");
+        if (collaboratorsCountLabel != null)
+            collaboratorsCountLabel.setText("0");
+        if (tasksCountLabel != null)
+            tasksCountLabel.setText("0");
     }
 
     private void loadUserInfo() {
@@ -53,20 +71,32 @@ public class DashboardController {
             User user = authService.getCurrentUser();
             System.out.println("Chargement info utilisateur: " + user.getUsername());
 
-            if (welcomeLabel != null) welcomeLabel.setText("Bienvenue, " + user.getUsername() + "!");
-            if (usernameLabel != null) usernameLabel.setText(user.getUsername());
-            if (emailLabel != null) emailLabel.setText(user.getEmail());
-            if (roleLabel != null) roleLabel.setText(user.getRole().toString());
-            if (currentUserLabel != null) currentUserLabel.setText(user.getUsername());
-            if (currentRoleLabel != null) currentRoleLabel.setText(user.getRole().toString());
+            if (welcomeLabel != null)
+                welcomeLabel.setText("Bienvenue, " + user.getUsername() + "!");
+            if (usernameLabel != null)
+                usernameLabel.setText(user.getUsername());
+            if (emailLabel != null)
+                emailLabel.setText(user.getEmail());
+            if (roleLabel != null)
+                roleLabel.setText(user.getRole().toString());
+            if (currentUserLabel != null)
+                currentUserLabel.setText(user.getUsername());
+            if (currentRoleLabel != null)
+                currentRoleLabel.setText(user.getRole().toString());
         } else {
             System.out.println("Utilisateur non connecté");
-            if (welcomeLabel != null) welcomeLabel.setText("Bienvenue dans votre tableau de bord");
-            if (usernameLabel != null) usernameLabel.setText("Utilisateur");
-            if (emailLabel != null) emailLabel.setText("email@exemple.com");
-            if (roleLabel != null) roleLabel.setText("Utilisateur");
-            if (currentUserLabel != null) currentUserLabel.setText("Utilisateur");
-            if (currentRoleLabel != null) currentRoleLabel.setText("Utilisateur");
+            if (welcomeLabel != null)
+                welcomeLabel.setText("Bienvenue dans votre tableau de bord");
+            if (usernameLabel != null)
+                usernameLabel.setText("Utilisateur");
+            if (emailLabel != null)
+                emailLabel.setText("email@exemple.com");
+            if (roleLabel != null)
+                roleLabel.setText("Utilisateur");
+            if (currentUserLabel != null)
+                currentUserLabel.setText("Utilisateur");
+            if (currentRoleLabel != null)
+                currentRoleLabel.setText("Utilisateur");
         }
         loadProjects();
     }
@@ -86,7 +116,8 @@ public class DashboardController {
                 projectsGrid.add(emptyStateContainer, 0, 0);
                 GridPane.setColumnSpan(emptyStateContainer, 2);
             }
-            if (projectsCountLabel != null) projectsCountLabel.setText("0");
+            if (projectsCountLabel != null)
+                projectsCountLabel.setText("0");
         } else {
             if (emptyStateContainer != null) {
                 emptyStateContainer.setVisible(false);
@@ -119,7 +150,8 @@ public class DashboardController {
                 }
             }
 
-            if (projectsCountLabel != null) projectsCountLabel.setText(String.valueOf(projects.size()));
+            if (projectsCountLabel != null)
+                projectsCountLabel.setText(String.valueOf(projects.size()));
         }
     }
 
@@ -154,6 +186,45 @@ public class DashboardController {
     @FXML
     private void AddProject() {
         openProjectForm(null);
+    }
+
+    @FXML
+    private void handleOpenKanban() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/kanban.fxml"));
+            // Note: We might need to create kanban.fxml if it doesn't exist, or use the
+            // existing way kanban is loaded.
+            // Based on previous analysis, kanbanController creates its own view in
+            // createView(), but let's check if there is a fxml or if we need to wrap it.
+            // Wait, kanbanController has createView() which returns a BorderPane. It seems
+            // it's not fully FXML based or the user wants me to use the existing controller
+            // logic.
+            // Let's look at how SprintsViewController loads sprint-card.fxml.
+            // Actually, looking at kanbanController, it has a createView() method that
+            // builds the UI programmatically.
+            // So I should instantiate the controller and call createView().
+
+            com.gestionprojet.controller.kanbanController controller = new com.gestionprojet.controller.kanbanController();
+            if (authService != null) {
+                controller.setUser(authService.getCurrentUser());
+            }
+            // We need to pass the user or something? The controller has setSprint, etc.
+            // For the global view, we might need to initialize it differently.
+
+            Parent root = controller.createView();
+
+            Stage stage = new Stage();
+            stage.setTitle("Tableau Kanban Global");
+            stage.setScene(new Scene(root));
+            stage.setWidth(1000);
+            stage.setHeight(800);
+            stage.show();
+
+        } catch (Exception e) {
+            System.err.println("Erreur ouverture Kanban: " + e.getMessage());
+            e.printStackTrace();
+            showError("Impossible d'ouvrir le tableau Kanban");
+        }
     }
 
     private void openProjectForm(Project project) {

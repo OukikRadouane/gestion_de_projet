@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Project {
     @Id
@@ -40,7 +38,7 @@ public class Project {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
+    public Project() {}
     public Project(String name, String description, User creator) {
         this.name = name;
         this.description = description;

@@ -1,13 +1,11 @@
 package com.gestionprojet.model.Tasks;
 
-
 import com.gestionprojet.model.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 public class Task {
@@ -54,7 +52,8 @@ public class Task {
         this.priority = Priority.MEDIUM;
     }
 
-    public Task (String title,String description, TaskStatus status, Priority priority, LocalDate deadline, User assignee, Sprint sprint ) {
+    public Task(String title, String description, TaskStatus status, Priority priority, LocalDate deadline,
+            User assignee, Sprint sprint) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -64,22 +63,69 @@ public class Task {
         this.sprint = sprint;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public TaskStatus getStatus() { return status; }
-    public void setStatus(TaskStatus status) { this.status = status; }
-    public Priority getPriority() { return priority; }
-    public void setPriority(Priority priority) { this.priority = priority; }
-    public LocalDate getDeadline() { return deadline; }
-    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
-    public User getAssignee() { return assignee; }
-    public void setAssignee(User assignee) { this.assignee = assignee; }
-    public Sprint getSprint() { return sprint; }
-    public void setSprint(Sprint sprint) { this.sprint = sprint; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public LocalDate getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDate deadline) {
+        this.deadline = deadline;
+    }
+
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
+    }
+
+    public Sprint getSprint() {
+        return sprint;
+    }
+
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+    }
 
     public void addComment(Comment comment) {
         if (comments == null) {
@@ -111,11 +157,12 @@ public class Task {
         }
     }
 
-    public void addLog(String message) {
+    public void addLog(String message, User user) {
         TaskLog log = new TaskLog();
         log.setMessage(message);
         log.setTimestamp(LocalDateTime.now());
         log.setTask(this);
+        log.setUser(user);
         logs.add(log);
     }
 

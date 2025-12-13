@@ -5,13 +5,17 @@ import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
+import com.gestionprojet.dao.ProjectDAO;
+import com.gestionprojet.dao.SprintDAO;
 import com.gestionprojet.dao.TaskDAO;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ClipboardContent;
@@ -24,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,16 +46,26 @@ public class kanbanController {
     private Project project;
     private List<Task> tasks;
 
+    private ComboBox<Project> projectCombo;
+    private ComboBox<Sprint> sprintCombo;
+
     private final TaskDAO taskDAO = new TaskDAO();
+    private final ProjectDAO projectDAO = new ProjectDAO();
+    private final SprintDAO sprintDAO = new SprintDAO();
 
     public kanbanController() {
         this.tasks = new ArrayList<>();
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     private void loadTasksForSprint() {
         if (sprint != null) {
             tasks = taskDAO.getBySprint(sprint);
-            System.out.println("Chargement des tâches pour le sprint: " + sprint.getName() + ", nombre de tâches: " + tasks.size());
+            System.out.println("Chargement des tâches pour le sprint: " + sprint.getName() + ", nombre de tâches: "
+                    + tasks.size());
         } else {
             tasks = new ArrayList<>();
             System.out.println("Aucun sprint défini, liste de tâches vide");
@@ -64,7 +79,18 @@ public class kanbanController {
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
         System.out.println("Sprint défini dans kanbanController: " + (sprint != null ? sprint.getName() : "null"));
-        loadTasksForSprint();
+        reloadTasks();
+    }
+
+    private void reloadTasks() {
+        if (sprint != null) {
+            loadTasksForSprint();
+        } else if (project != null) {
+            loadTasksByProject(project.getId());
+        } else {
+            tasks = new ArrayList<>();
+            refreshColumns();
+        }
     }
 
     public BorderPane createView() {
@@ -104,6 +130,48 @@ public class kanbanController {
             topBar.getChildren().add(sprintLabel);
         }
 
+        // Filtres
+        projectCombo = new ComboBox<>();
+        projectCombo.setPromptText("Sélectionner un projet");
+        projectCombo.setPrefWidth(200);
+
+        sprintCombo = new ComboBox<>();
+        sprintCombo.setPromptText("Tous les sprints");
+        sprintCombo.setPrefWidth(200);
+        sprintCombo.setDisable(true); // Désactivé tant qu'aucun projet n'est choisi
+
+        // Configuration des convertisseurs pour l'affichage
+        projectCombo.setConverter(new StringConverter<Project>() {
+            @Override
+            public String toString(Project project) {
+                return project != null ? project.getName() : "";
+            }
+
+            @Override
+            public Project fromString(String string) {
+                return null; // Pas nécessaire pour ce cas d'utilisation
+            }
+        });
+
+        sprintCombo.setConverter(new StringConverter<Sprint>() {
+            @Override
+            public String toString(Sprint sprint) {
+                return sprint != null ? sprint.getName() : "Tous les sprints";
+            }
+
+            @Override
+            public Sprint fromString(String string) {
+                return null;
+            }
+        });
+
+        // Chargement des projets
+        loadProjects();
+
+        // Listeners
+        projectCombo.setOnAction(e -> handleProjectSelection());
+        sprintCombo.setOnAction(e -> handleSprintSelection());
+
         HBox buttonContainer = new HBox(10);
         buttonContainer.setAlignment(Pos.CENTER_LEFT);
         buttonContainer.setPadding(new Insets(10, 0, 0, 0));
@@ -112,7 +180,10 @@ public class kanbanController {
         addTaskButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
         addTaskButton.setOnAction(e -> handleAddTask());
 
-        buttonContainer.getChildren().add(addTaskButton);
+        // Cacher le bouton d'ajout si aucun projet n'est sélectionné
+        addTaskButton.setVisible(false);
+
+        buttonContainer.getChildren().addAll(projectCombo, sprintCombo, addTaskButton);
         topBar.getChildren().addAll(titleLabel, buttonContainer);
 
         return topBar;
@@ -174,7 +245,8 @@ public class kanbanController {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
-        scrollPane.setStyle("-fx-background: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
+        scrollPane.setStyle(
+                "-fx-background: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
         scrollPane.setFocusTraversable(false);
         scrollPane.setContent(column);
 
@@ -193,11 +265,13 @@ public class kanbanController {
 
             // Passer le sprint actuel à la boîte de dialogue
             dialogController.setSprint(sprint);
+            dialogController.setCurrentUser(this.user);
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
 
             // Recharger les tâches après ajout
-            loadTasksForSprint();
+            // Recharger les tâches après ajout
+            reloadTasks();
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -216,14 +290,25 @@ public class kanbanController {
             Parent root = loader.load();
 
             TaskDialogController dialogController = loader.getController();
-            dialogController.setTask(task);
+
+            // Recharger la tâche avec ses collections initialisées pour éviter
+            // LazyInitializationException
+            Task fullTask = taskDAO.getByIdWithCollections(task.getId());
+            if (fullTask != null) {
+                dialogController.setTask(fullTask);
+            } else {
+                dialogController.setTask(task); // Fallback
+            }
+
             dialogController.setSprint(sprint); // Passer le sprint actuel
+            dialogController.setCurrentUser(this.user);
 
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
 
             // Recharger les tâches après édition
-            loadTasksForSprint();
+            // Recharger les tâches après édition
+            reloadTasks();
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -285,7 +370,8 @@ public class kanbanController {
 
     private VBox createTaskCard(Task task) {
         VBox card = new VBox(8);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-cursor: hand;");
+        card.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-cursor: hand;");
         card.setPadding(new Insets(10));
 
         Label titleLabel = new Label(task.getTitle());
@@ -296,7 +382,6 @@ public class kanbanController {
         descLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12px;");
         descLabel.setWrapText(true);
 
-
         // Action buttons
         HBox buttonBox = new HBox(8);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
@@ -306,16 +391,19 @@ public class kanbanController {
         deleteButton.setOnAction(e -> {
             try {
                 taskDAO.delete(task.getId());
-                loadTasksForSprint(); // Recharger après suppression
+                taskDAO.delete(task.getId());
+                reloadTasks(); // Recharger après suppression
             } catch (Exception ex) {
                 ex.printStackTrace();
                 System.err.println("Erreur lors de la suppression de la tâche");
             }
         });
+        deleteButton.setOnMouseClicked(e -> e.consume());
 
         Button editButton = new Button("Modifier");
         editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 10px;");
         editButton.setOnAction(e -> handleEditTask(task));
+        editButton.setOnMouseClicked(e -> e.consume());
 
         buttonBox.getChildren().addAll(editButton, deleteButton);
         card.getChildren().addAll(titleLabel, descLabel, buttonBox);
@@ -324,7 +412,9 @@ public class kanbanController {
         setupDragSource(card, task);
 
         card.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) { // Double-clic pour ouvrir les détails
+            System.out.println("Click detected on task card. Count: " + e.getClickCount());
+            if (e.getClickCount() == 1) { // Simple clic pour ouvrir les détails
+                System.out.println("Single click detected. Opening details for task: " + task.getId());
                 openTaskDetails(task);
             }
         });
@@ -381,6 +471,7 @@ public class kanbanController {
                         if (task.getId() == taskId) {
                             // Mettre à jour le statut
                             task.setStatus(targetStatus);
+                            task.addLog("Statut changé vers " + targetStatus, this.user);
 
                             // Sauvegarder en base de données
                             taskDAO.update(task);
@@ -392,7 +483,7 @@ public class kanbanController {
 
                     if (success) {
                         // Recharger les tâches pour refléter le changement
-                        loadTasksForSprint();
+                        reloadTasks();
                     }
                 } catch (NumberFormatException e) {
                     System.err.println("Erreur de format de l'ID de tâche: " + dragboard.getString());
@@ -408,24 +499,34 @@ public class kanbanController {
     }
 
     private void openTaskDetails(Task task) {
+        System.out.println("Attempting to open details for task: " + task.getId());
         try {
             // Récupérer la tâche complète avec ses collections
             Task fullTask = taskDAO.getByIdWithCollections(task.getId());
+            if (fullTask == null) {
+                System.err.println("Task not found with ID: " + task.getId());
+                return;
+            }
+            System.out.println("Task loaded: " + fullTask.getTitle());
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDetailsView.fxml"));
             Parent root = loader.load();
+            System.out.println("FXML loaded successfully");
 
             TaskDetailsController controller = loader.getController();
             controller.setTask(fullTask);
+            controller.setCurrentUser(this.user);
+            System.out.println("Controller initialized");
 
             Stage stage = new Stage();
             stage.setTitle("Détails de la tâche - " + fullTask.getTitle());
             stage.setScene(new Scene(root, 900, 800));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.show();
+            System.out.println("Stage shown");
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.err.println("Erreur lors de l'ouverture des détails de la tâche");
+            System.err.println("Erreur lors de l'ouverture des détails de la tâche: " + ex.getMessage());
         }
     }
 
@@ -445,7 +546,74 @@ public class kanbanController {
     // Méthode pour réinitialiser le contrôleur
     public void reset() {
         this.sprint = null;
+        this.project = null;
         this.tasks = new ArrayList<>();
+        if (projectCombo != null)
+            projectCombo.getSelectionModel().clearSelection();
+        if (sprintCombo != null) {
+            sprintCombo.getItems().clear();
+            sprintCombo.setDisable(true);
+        }
+        if (addTaskButton != null)
+            addTaskButton.setVisible(false);
         refreshColumns();
+    }
+
+    private void loadProjects() {
+        List<Project> projects = projectDAO.getAllProjects(); // Ou filtrer par utilisateur si nécessaire
+        projectCombo.setItems(FXCollections.observableArrayList(projects));
+    }
+
+    private void handleProjectSelection() {
+        Project selectedProject = projectCombo.getValue();
+        if (selectedProject != null) {
+            this.project = selectedProject;
+            this.sprint = null; // Reset sprint selection
+
+            // Activer le bouton d'ajout
+            if (addTaskButton != null)
+                addTaskButton.setVisible(true);
+
+            // Charger les sprints du projet
+            List<Sprint> sprints = sprintDAO.getAllSprintsByProject(selectedProject);
+            sprintCombo.setItems(FXCollections.observableArrayList(sprints));
+            // Ajouter une option "null" pour "Tous les sprints" si on veut,
+            // mais ComboBox gère le null selection comme "rien sélectionné" ou on peut
+            // ajouter un item fictif.
+            // Ici on va juste permettre de désélectionner ou sélectionner un sprint.
+            // Pour simplifier, on va dire que si on sélectionne un projet, on charge toutes
+            // les tâches du projet par défaut.
+
+            sprintCombo.setDisable(false);
+
+            // Charger toutes les tâches du projet
+            // Charger toutes les tâches du projet
+            reloadTasks();
+        } else {
+            this.project = null;
+            this.sprint = null;
+            sprintCombo.getItems().clear();
+            sprintCombo.setDisable(true);
+            if (addTaskButton != null)
+                addTaskButton.setVisible(false);
+            tasks.clear();
+            refreshColumns();
+        }
+    }
+
+    private void handleSprintSelection() {
+        Sprint selectedSprint = sprintCombo.getValue();
+        if (selectedSprint != null) {
+            this.sprint = selectedSprint;
+            this.sprint = selectedSprint;
+            reloadTasks();
+        } else {
+            // Si aucun sprint sélectionné mais un projet est là, on réaffiche toutes les
+            // tâches du projet
+            this.sprint = null;
+            if (this.project != null) {
+                reloadTasks();
+            }
+        }
     }
 }

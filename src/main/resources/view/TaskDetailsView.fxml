@@ -5,77 +5,83 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.control.skin.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.gestionprojet.controller.TaskDetailsController"
-      spacing="15"
-      style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1;">
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.gestionprojet.controller.TaskDetailsController"
+            fitToWidth="true"
+            fitToHeight="true"
+            style="-fx-background-color: white; -fx-background: white;">
+    <content>
+        <VBox spacing="15"
+              style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1;">
 
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
 
-    <!-- Titre -->
-    <Label fx:id="titleLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;"/>
+            <!-- Titre -->
+            <Label fx:id="titleLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-padding: 0 0 10 0;"/>
 
-    <!-- Métadonnées avec fond légèrement gris -->
-    <VBox style=" -fx-padding: 15;">
-        <GridPane hgap="15" vgap="10">
-            <Label text="Statut:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="statusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+            <!-- Métadonnées avec fond légèrement gris -->
+            <VBox style=" -fx-padding: 15;">
+                <GridPane hgap="15" vgap="10">
+                    <Label text="Statut:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                    <Label fx:id="statusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
-            <Label text="Priorité:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="priorityLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                    <Label text="Priorité:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                    <Label fx:id="priorityLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
-            <Label text="Assigné à:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="assigneeLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                    <Label text="Assigné à:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                    <Label fx:id="assigneeLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
-            <Label text="Sprint:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="sprintLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
-        </GridPane>
-    </VBox>
+                    <Label text="Sprint:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                    <Label fx:id="sprintLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                </GridPane>
+            </VBox>
 
-    <!-- Description -->
-    <Label text="Description" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-    <TextArea fx:id="descriptionArea" editable="false" prefRowCount="3" style="-fx-focus-color: transparent;-fx-faint-focus-color: transparent;-fx-background-insets: 0;-fx-background-radius: 0;"/>
+            <!-- Description -->
+            <Label text="Description" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <TextArea fx:id="descriptionArea" editable="false" prefRowCount="3" style="-fx-focus-color: transparent;-fx-faint-focus-color: transparent;-fx-background-insets: 0;-fx-background-radius: 0;"/>
 
-    <!-- Sous-tâches -->
-    <Label text="Sous-tâches" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-    <VBox fx:id="subtasksContainer"
-          style="-fx-padding: 5;"
-          prefHeight="5">
-    </VBox>
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="newSubtaskField" promptText="Nouvelle sous-tâche..." HBox.hgrow="ALWAYS" style="-fx-background-color: white;"/>
-        <Button text="✓" onAction="#handleAddSubtask"
-                style=" -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
-        <Button text="✕" onAction="#handleCancelSubtask"
-                style="  -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
-    </HBox>
+            <!-- Sous-tâches -->
+            <Label text="Sous-tâches" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <VBox fx:id="subtasksContainer"
+                  style="-fx-padding: 5;"
+                  prefHeight="5">
+            </VBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="newSubtaskField" promptText="Nouvelle sous-tâche..." HBox.hgrow="ALWAYS" style="-fx-background-color: white;"/>
+                <Button text="✓" onAction="#handleAddSubtask"
+                        style=" -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
+                <Button text="✕" onAction="#handleCancelSubtask"
+                        style="  -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
+            </HBox>
 
-    <!-- Commentaires -->
-    <Label text="Commentaires" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-    <VBox fx:id="commentsContainer"
-          style="-fx-padding: 8;"
-          prefHeight="5"></VBox>
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="newCommentField" promptText="Ajouter un commentaire..." HBox.hgrow="ALWAYS"
-                   style="-fx-background-color: white;"/>
-        <Button text="✓" onAction="#handleAddComment"
-                style="-fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
-        <Button text="✕" onAction="#handleCancelComment"
-                style="-fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
-    </HBox>
+            <!-- Commentaires -->
+            <Label text="Commentaires" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <VBox fx:id="commentsContainer"
+                  style="-fx-padding: 8;"
+                  prefHeight="5"></VBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="newCommentField" promptText="Ajouter un commentaire..." HBox.hgrow="ALWAYS"
+                           style="-fx-background-color: white;"/>
+                <Button text="✓" onAction="#handleAddComment"
+                        style="-fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
+                <Button text="✕" onAction="#handleCancelComment"
+                        style="-fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-min-width: 30; -fx-min-height: 30;"/>
+            </HBox>
 
-    <!-- Logs -->
-    <Label text="Historique" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
-    <TextArea fx:id="logsArea" wrapText="true" editable="false"
-              style="-fx-padding: 8;"
-              prefRowCount="2"/>
+            <!-- Logs -->
+            <Label text="Historique" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <TextArea fx:id="logsArea" wrapText="true" editable="false"
+                      style="-fx-padding: 8;"
+                      prefRowCount="2"/>
 
-    <!-- Boutons -->
-    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
-        <Button text="Fermer" onAction="#handleClose"
-                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;"/>
-    </HBox>
-</VBox>
+            <!-- Boutons -->
+            <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                <Button text="Fermer" onAction="#handleClose"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15;"/>
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>

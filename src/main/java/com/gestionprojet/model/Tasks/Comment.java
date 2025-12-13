@@ -37,18 +37,58 @@ public class Comment {
     }
 
     // getters et setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Task getTask() { return task; }
-    public void setTask(Task task) { this.task = task; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public User getAuthor() { return author; }
-    public void setAuthor(User author) { this.author = author; }
+    public Task getTask() {
+        return task;
+    }
 
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
+    public void setTask(Task task) {
+        this.task = task;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Comment comment = (Comment) o;
+        return id != null && id.equals(comment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

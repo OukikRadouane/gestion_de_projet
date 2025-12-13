@@ -11,11 +11,48 @@ import java.util.List;
 
 public class TaskDAO {
 
-    public void save(Task task) {
+    public Task save(Task task) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             session.beginTransaction();
-            session.merge(task);
+            Task savedTask = session.merge(task);
+            session.getTransaction().commit();
+            return savedTask;
+        } catch (Exception e) {
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
+
+    public Task update(Task task) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+            Task updatedTask = session.merge(task);
+            session.getTransaction().commit();
+            return updatedTask;
+        } catch (Exception e) {
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
+
+    public void delete(Long id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+            Task task = session.find(Task.class, id);
+            if (task != null) {
+                session.remove(task);
+            }
             session.getTransaction().commit();
         } catch (Exception e) {
             if (session.getTransaction().isActive()) {
@@ -26,60 +63,33 @@ public class TaskDAO {
             session.close();
         }
     }
-    public void update(Task task){
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            session.beginTransaction();
-            session.merge(task);
-            session.getTransaction().commit();
-        }catch(Exception e){
-            if(session.getTransaction().isActive()){
-                session.getTransaction().rollback();
-            }throw e;
-        }finally {
-            session.close();
-        }
-    }
-    public void delete(Long id){
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            session.beginTransaction();
-            Task task = session.find(Task.class,id);
-            if(task != null){
-                session.remove(task);
-            }
-            session.getTransaction().commit();
-        }catch(Exception e){
-            if(session.getTransaction().isActive()){
-                session.getTransaction().rollback();
-            }throw e;
-        }finally {
-            session.close();
-        }
-    }
-    public Task getById(Long id){
+
+    public Task getById(Long id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.find(Task.class, id);
-        }finally {
+        } finally {
             session.close();
         }
     }
 
-    public List<Task> getAll(){
+    public List<Task> getAll() {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        try{
+        try {
             return session.createQuery("SELECT t FROM Task t ORDER BY t.deadline", Task.class).list();
-        }finally {
+        } finally {
             session.close();
         }
     }
-    public List<Task> getBySprint(Sprint sprint){
+
+    public List<Task> getBySprint(Sprint sprint) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        try{
-            return session.createQuery("Select t From Task t Where t.sprint= :sprint Order By t.priority DESC, t.deadline", Task.class).
-            setParameter("sprint", sprint).getResultList();
-        }finally {
+        try {
+            return session
+                    .createQuery("Select t From Task t Where t.sprint= :sprint Order By t.priority DESC, t.deadline",
+                            Task.class)
+                    .setParameter("sprint", sprint).getResultList();
+        } finally {
             session.close();
         }
 
@@ -89,9 +99,8 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.createQuery(
-                            "Select t From Task t Where t.sprint.project = :project Order By t.priority DESC, t.deadline",
-                            Task.class
-                    )
+                    "Select t From Task t Where t.sprint.project = :project Order By t.priority DESC, t.deadline",
+                    Task.class)
                     .setParameter("project", project)
                     .getResultList();
         } finally {
@@ -99,12 +108,12 @@ public class TaskDAO {
         }
     }
 
-
-    public List<Task> getBySprintAndStatus(Sprint sprint , TaskStatus status) {
+    public List<Task> getBySprintAndStatus(Sprint sprint, TaskStatus status) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            return session.createQuery("Select t From Task t Where t.sprint= :sprint and t.status= :status Order By t.priority DESC, t.deadline", Task.class).
-                    setParameter("sprint", sprint).setParameter("status", status).getResultList();
+            return session.createQuery(
+                    "Select t From Task t Where t.sprint= :sprint and t.status= :status Order By t.priority DESC, t.deadline",
+                    Task.class).setParameter("sprint", sprint).setParameter("status", status).getResultList();
         } finally {
             session.close();
         }
@@ -135,18 +144,20 @@ public class TaskDAO {
         try {
             session.beginTransaction();
 
-            // Recharger la sous-tâche depuis la base de données pour s'assurer qu'elle est gérée
+            // Recharger la sous-tâche depuis la base de données pour s'assurer qu'elle est
+            // gérée
             Subtask managedSubtask = session.find(Subtask.class, subtask.getId());
             if (managedSubtask != null) {
                 session.remove(managedSubtask);
             }
 
             session.getTransaction().commit();
-        } catch(Exception e){
-            if(session.getTransaction().isActive()){
+        } catch (Exception e) {
+            if (session.getTransaction().isActive()) {
                 session.getTransaction().rollback();
-            }throw e;
-        }finally {
+            }
+            throw e;
+        } finally {
             session.close();
         }
     }
@@ -157,18 +168,20 @@ public class TaskDAO {
         try {
             session.beginTransaction();
 
-            // Recharger le commentaire depuis la base de données pour s'assurer qu'il est géré
+            // Recharger le commentaire depuis la base de données pour s'assurer qu'il est
+            // géré
             Comment managedComment = session.find(Comment.class, comment.getId());
             if (managedComment != null) {
                 session.remove(managedComment);
             }
 
             session.getTransaction().commit();
-        } catch(Exception e){
-            if(session.getTransaction().isActive()){
+        } catch (Exception e) {
+            if (session.getTransaction().isActive()) {
                 session.getTransaction().rollback();
-            }throw e;
-        }finally {
+            }
+            throw e;
+        } finally {
             session.close();
         }
     }

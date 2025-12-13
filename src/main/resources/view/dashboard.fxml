@@ -158,6 +158,9 @@
                         <Button text="Créer un projet" onAction="#AddProject"
                                 style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 6px; -fx-font-weight: 600; -fx-font-size: 13px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 8 16;"
                                 focusTraversable="false"/>
+                        <Button text="Tableau de Kanban" onAction="#handleOpenKanban"
+                                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 6px; -fx-font-weight: 600; -fx-font-size: 13px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 8 16;"
+                                focusTraversable="false"/>
                     </HBox>
 
                     <!-- Conteneur scrollable pour les projets en grille -->
