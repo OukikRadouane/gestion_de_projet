@@ -16,6 +16,9 @@
 
             <!-- En-tête -->
             <HBox alignment="CENTER_LEFT" spacing="20">
+                <Button fx:id="backButton" text="← Retour" onAction="#handleBack"
+                        style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 6px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 10 20;"
+                        focusTraversable="false"/>
                 <Label text="Gestion des Utilisateurs"
                        style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 24px; -fx-font-family: 'Segoe UI', sans-serif;"/>
                 <Region HBox.hgrow="ALWAYS"/>

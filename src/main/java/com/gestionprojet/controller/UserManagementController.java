@@ -29,6 +29,7 @@ public class UserManagementController {
     @FXML private TableColumn<User, String> roleColumn;
     @FXML private TableColumn<User, String> statusColumn;
     @FXML private TableColumn<User, String> createdAtColumn;
+    @FXML private Button backButton;
     @FXML private Button addUserButton;
     @FXML private Button editUserButton;
     @FXML private Button toggleStatusButton;
@@ -56,10 +57,14 @@ public class UserManagementController {
     }
 
     private void setupTableColumns() {
-        firstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        firstNameColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getFirstName()));
+        lastNameColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getLastName()));
+        usernameColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getUsername()));
+        emailColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(cellData.getValue().getEmail()));
         roleColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getRole().getLabel()));
         statusColumn.setCellValueFactory(cellData -> {
@@ -232,6 +237,22 @@ public class UserManagementController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/super-admin-dashboard.fxml"));
+            Parent root = loader.load();
+            
+            SuperAdminDashboardController controller = loader.getController();
+            controller.setAuthService(authService);
+            
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            showError("Erreur lors du retour: " + e.getMessage());
+        }
     }
 
     private void showError(String message) {

@@ -29,7 +29,4 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<Sprint> sprints;
-
-
-
-   }
+}

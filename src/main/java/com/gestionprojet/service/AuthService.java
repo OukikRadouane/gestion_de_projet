@@ -7,6 +7,7 @@ import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.dao.UserDAO;
 import com.gestionprojet.utils.PasswordUtils;
 import com.gestionprojet.utils.ValidationUtils;
+import com.gestionprojet.utils.SessionManager;
 
 import java.util.List;
 import java.util.Optional;
