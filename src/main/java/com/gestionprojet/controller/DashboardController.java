@@ -107,6 +107,17 @@ public class DashboardController {
             return;
         }
 
+        // Fetch projects from database if null or empty
+        if ((projects == null || projects.isEmpty()) && authService != null && authService.isLoggedIn()) {
+            try {
+                projects = projectDAO.getAllProjectsByUser(authService.getCurrentUser());
+                System.out.println("Fetched " + (projects != null ? projects.size() : 0) + " projects for dashboard.");
+            } catch (Exception e) {
+                System.err.println("Error fetching projects for dashboard: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
         projectsGrid.getChildren().clear();
 
         if (projects == null || projects.isEmpty()) {
@@ -186,45 +197,6 @@ public class DashboardController {
     @FXML
     private void AddProject() {
         openProjectForm(null);
-    }
-
-    @FXML
-    private void handleOpenKanban() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/kanban.fxml"));
-            // Note: We might need to create kanban.fxml if it doesn't exist, or use the
-            // existing way kanban is loaded.
-            // Based on previous analysis, kanbanController creates its own view in
-            // createView(), but let's check if there is a fxml or if we need to wrap it.
-            // Wait, kanbanController has createView() which returns a BorderPane. It seems
-            // it's not fully FXML based or the user wants me to use the existing controller
-            // logic.
-            // Let's look at how SprintsViewController loads sprint-card.fxml.
-            // Actually, looking at kanbanController, it has a createView() method that
-            // builds the UI programmatically.
-            // So I should instantiate the controller and call createView().
-
-            com.gestionprojet.controller.kanbanController controller = new com.gestionprojet.controller.kanbanController();
-            if (authService != null) {
-                controller.setUser(authService.getCurrentUser());
-            }
-            // We need to pass the user or something? The controller has setSprint, etc.
-            // For the global view, we might need to initialize it differently.
-
-            Parent root = controller.createView();
-
-            Stage stage = new Stage();
-            stage.setTitle("Tableau Kanban Global");
-            stage.setScene(new Scene(root));
-            stage.setWidth(1000);
-            stage.setHeight(800);
-            stage.show();
-
-        } catch (Exception e) {
-            System.err.println("Erreur ouverture Kanban: " + e.getMessage());
-            e.printStackTrace();
-            showError("Impossible d'ouvrir le tableau Kanban");
-        }
     }
 
     private void openProjectForm(Project project) {

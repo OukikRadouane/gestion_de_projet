@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestionprojet.controller.MainController"
+            stylesheets="@../css/style.css"
+            prefWidth="1200" prefHeight="800">
+
+    <left>
+        <VBox styleClass="sidebar" prefWidth="260" spacing="10">
+            <padding>
+                <Insets top="30" right="15" bottom="30" left="15"/>
+            </padding>
+
+            <!-- App Logo / Name -->
+            <VBox alignment="CENTER_LEFT" spacing="8">
+                <padding>
+                    <Insets bottom="30" left="10"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                     <Circle radius="12" styleClass="accent-circle"/>
+                     <Label text="ProjectHub" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: -fx-text-primary;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Active Context Selection -->
+            <VBox spacing="15" style="-fx-padding: 0 10 30 10;">
+                <VBox spacing="5">
+                    <Label text="PROJET ACTIF" styleClass="small-text" style="-fx-font-weight: 700; -fx-text-fill: -fx-text-secondary; -fx-font-size: 10px;"/>
+                    <ComboBox fx:id="comboActiveProject" promptText="Sélectionner..." maxWidth="Infinity" styleClass="input" style="-fx-padding: 8;"/>
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="SPRINT ACTIF" styleClass="small-text" style="-fx-font-weight: 700; -fx-text-fill: -fx-text-secondary; -fx-font-size: 10px;"/>
+                    <ComboBox fx:id="comboActiveSprint" promptText="Sélectionner..." maxWidth="Infinity" styleClass="input" style="-fx-padding: 8;"/>
+                </VBox>
+            </VBox>
+
+            <!-- Navigation Links -->
+            <VBox spacing="4" VBox.vgrow="ALWAYS">
+                <Button fx:id="btnDashboard" text="Dashboard" onAction="#showDashboard"
+                        styleClass="sidebar-item, sidebar-item-active" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button fx:id="btnProjects" text="Projets" onAction="#showProjects"
+                        styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button fx:id="btnSprints" text="Sprints" onAction="#showSprints"
+                        styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button fx:id="btnBacklog" text="Backlog" onAction="#showBacklog"
+                        styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                <Button fx:id="btnKanban" text="Kanban" onAction="#showKanban"
+                        styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                
+                <Region VBox.vgrow="ALWAYS" />
+                
+                <Button fx:id="btnSettings" text="Paramètres" onAction="#showSettings"
+                        styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+            </VBox>
+
+            <!-- User Profile & Logout -->
+            <VBox spacing="15" style="-fx-padding: 20 0 0 0; -fx-border-color: -fx-border transparent transparent transparent;">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <padding>
+                        <Insets left="10"/>
+                    </padding>
+                    <VBox>
+                        <Label fx:id="lblUserName" text="User Name" style="-fx-font-weight: 600; -fx-font-size: 14px;"/>
+                        <Label fx:id="lblUserRole" text="Scrum Master" styleClass="small-text"/>
+                    </VBox>
+                </HBox>
+                <Button text="Déconnexion" onAction="#handleLogout"
+                        style="-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-cursor: hand; -fx-font-weight: 500;"
+                        maxWidth="Infinity" alignment="BASELINE_LEFT">
+                    <padding>
+                        <Insets left="10"/>
+                    </padding>
+                </Button>
+            </VBox>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-background-color: -fx-bg-secondary;">
+            <!-- Content will be injected here -->
+        </StackPane>
+    </center>
+
+</BorderPane>

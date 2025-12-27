@@ -29,7 +29,11 @@ public class SprintsViewController {
 
     private SprintDAO sprintDAO = new SprintDAO();
     private Project project;
-    private DashboardController dashboardController;
+    private MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     public void setProject(Project project) {
         this.project = project;
@@ -39,12 +43,14 @@ public class SprintsViewController {
         loadSprints();
     }
 
-    public void setDashboardController(DashboardController controller) {
-        this.dashboardController = controller;
+    private com.gestionprojet.model.User currentUser;
+
+    public void setCurrentUser(com.gestionprojet.model.User user) {
+        this.currentUser = user;
     }
 
     public com.gestionprojet.model.User getCurrentUser() {
-        return dashboardController != null ? dashboardController.getCurrentUser() : null;
+        return this.currentUser;
     }
 
     public void loadSprints() {
@@ -101,6 +107,13 @@ public class SprintsViewController {
         loadSprints();
     }
 
+    public void navigateToKanban(Sprint sprint) {
+        if (mainController != null) {
+            mainController.selectSprint(sprint);
+            mainController.showKanban();
+        }
+    }
+
     @FXML
     private void handleAddSprint() {
         openSprintForm(null);
@@ -154,8 +167,9 @@ public class SprintsViewController {
 
     @FXML
     private void handleBack() {
-        Stage stage = (Stage) projectNameLabel.getScene().getWindow();
-        stage.close();
+        if (mainController != null) {
+            mainController.showDashboard();
+        }
     }
 
     private void showSuccess(String message) {

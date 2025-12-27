@@ -34,6 +34,7 @@ public class TaskDialogController {
     private final TaskDAO taskDAO = new TaskDAO();
     private final com.gestionprojet.dao.UserDAO userDAO = new com.gestionprojet.dao.UserDAO();
     private Sprint sprint;
+    private Project project;
     private Task task;
 
     @FXML
@@ -141,7 +142,7 @@ public class TaskDialogController {
         }
         try {
             if (task == null) {
-                task = new Task(name, description, status, priority, deadline, assignee, sprint);
+                task = new Task(name, description, status, priority, deadline, assignee, sprint, project);
                 task.addLog("Tâche créée", currentUser);
                 taskDAO.save(task);
                 System.out.println("✅ tache inséré avec succès !");
@@ -174,6 +175,8 @@ public class TaskDialogController {
             statusChoice.setValue(task.getStatus());
             dueDatePicker.setValue(task.getDeadline());
             assigneChoice.setValue(task.getAssignee());
+            this.project = task.getProject();
+            this.sprint = task.getSprint();
         }
     }
 
@@ -195,6 +198,10 @@ public class TaskDialogController {
 
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public Task getTask() {

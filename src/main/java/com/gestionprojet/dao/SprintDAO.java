@@ -17,7 +17,8 @@ public class SprintDAO {
             session.persist(sprint);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -29,7 +30,8 @@ public class SprintDAO {
             session.merge(sprint);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -39,10 +41,12 @@ public class SprintDAO {
         try (Session session = HibernateUtil.getSession()) {
             tx = session.beginTransaction();
             Sprint s = session.find(Sprint.class, sprint.getId());
-            if (s != null) session.remove(s);
+            if (s != null)
+                session.remove(s);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -56,8 +60,9 @@ public class SprintDAO {
     public List<Sprint> getAllSprintsByProject(Project project) {
         try (Session session = HibernateUtil.getSession()) {
             return session.createQuery(
-                            "FROM Sprint s WHERE s.project = :project ORDER BY s.startDate DESC", Sprint.class)
-                    .setParameter("project", project)
+                    "SELECT s FROM Sprint s LEFT JOIN FETCH s.project WHERE s.project.id = :projectId ORDER BY s.startDate DESC",
+                    Sprint.class)
+                    .setParameter("projectId", project.getId())
                     .getResultList();
         }
     }
@@ -73,13 +78,12 @@ public class SprintDAO {
         try (Session session = HibernateUtil.getSession()) {
             java.time.LocalDate today = java.time.LocalDate.now();
             return session.createQuery(
-                            "FROM Sprint s WHERE s.project = :project AND s.startDate <= :today AND s.endDate >= :today", 
-                            Sprint.class)
-                    .setParameter("project", project)
+                    "SELECT s FROM Sprint s LEFT JOIN FETCH s.project WHERE s.project.id = :projectId AND s.startDate <= :today AND s.endDate >= :today",
+                    Sprint.class)
+                    .setParameter("projectId", project.getId())
                     .setParameter("today", today)
                     .setMaxResults(1)
                     .uniqueResult();
         }
     }
 }
-

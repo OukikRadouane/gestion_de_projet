@@ -38,13 +38,17 @@ public class Project {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-    public Project() {}
+
+    public Project() {
+    }
+
     public Project(String name, String description, User creator) {
         this.name = name;
         this.description = description;
         this.creator = creator;
         this.createdAt = LocalDateTime.now();
     }
+
     public Long getId() {
         return id;
     }
@@ -85,10 +89,21 @@ public class Project {
         this.creator = creator;
     }
 
-    public LocalDate getStartDate() {return startDate;}
-    public void setStartDate(LocalDate startDate) {this.startDate = startDate;}
-    public LocalDate getEndDate() {return endDate;}
-    public void setEndDate(LocalDate endDate) {this.endDate = endDate;}
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
     public List<Sprint> getSprints() {
         return sprints;
@@ -98,5 +113,18 @@ public class Project {
         this.sprints = sprints;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Project project = (Project) o;
+        return id != null && id.equals(project.id);
+    }
 
-   }
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+}

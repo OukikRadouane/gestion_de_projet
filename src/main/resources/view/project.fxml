@@ -3,95 +3,53 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.gestionprojet.controller.ProjectController"
-      alignment="TOP_CENTER"
-      spacing="0"
-      prefWidth="480" prefHeight="600"
-      maxWidth="480" maxHeight="600"
-      style="-fx-background-color: white; -fx-background-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 25, 0, 0, 5);">
+      stylesheets="@../css/style.css"
+      spacing="25" prefWidth="500">
+    
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
 
-    <!-- En-tête avec bordure inférieure -->
-    <VBox alignment="CENTER_LEFT" spacing="4"
-          style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0; -fx-background-radius: 12 12 0 0;">
-        <padding>
-            <Insets top="20" right="24" bottom="16" left="24"/>
-        </padding>
-        <Label text="Créer un nouveau projet"
-               style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 20px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-        <Label text="Remplissez les informations du projet"
-               style="-fx-text-fill: #64748b; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+    <Label text="Détails du projet" styleClass="h1" />
+
+    <VBox spacing="20">
+        <VBox spacing="8">
+            <Label text="Nom du projet" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
+            <TextField fx:id="ProjectName" promptText="Entrez le nom du projet..."
+                       style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+        </VBox>
+
+        <VBox spacing="8">
+            <Label text="Description" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
+            <TextArea fx:id="ProjectDesc" promptText="Décrivez le projet..." prefRowCount="4" wrapText="true"
+                      style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+        </VBox>
+
+        <GridPane hgap="20">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" />
+                <ColumnConstraints percentWidth="50" />
+            </columnConstraints>
+
+            <VBox spacing="8" GridPane.columnIndex="0">
+                <Label text="Date de début" styleClass="label-strong" />
+                <DatePicker fx:id="ProjectStartDate" maxWidth="Infinity" styleClass="input" />
+            </VBox>
+
+            <VBox spacing="8" GridPane.columnIndex="1">
+                <Label text="Date de fin" styleClass="label-strong" />
+                <DatePicker fx:id="ProjectEndDate" maxWidth="Infinity" styleClass="input" />
+            </VBox>
+        </GridPane>
     </VBox>
 
-    <!-- Zone de défilement pour le formulaire -->
-    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
-                style="-fx-background-color: white; -fx-background: white; -fx-border-color: transparent;">
-        <VBox spacing="20" style="-fx-background-color: white;">
-            <padding>
-                <Insets top="24" right="24" bottom="16" left="24"/>
-            </padding>
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-box" />
 
-            <!-- Nom du projet -->
-            <VBox spacing="8">
-                <Label text="Nom du projet"
-                       style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-                <TextField fx:id="ProjectName" promptText="Entrez le nom du projet"
-                           style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-prompt-text-fill: #94a3b8;"/>
-            </VBox>
-
-            <!-- Description -->
-            <VBox spacing="8">
-                <Label text="Description"
-                       style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-                <TextArea fx:id="ProjectDesc" promptText="Décrivez votre projet..."
-                          wrapText="true" prefRowCount="4"
-                          style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-prompt-text-fill: #94a3b8;"/>
-            </VBox>
-
-            <!-- Dates en ligne -->
-            <HBox spacing="16">
-                <VBox spacing="8" HBox.hgrow="ALWAYS">
-                    <Label text="Date de début"
-                           style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-                    <DatePicker fx:id="ProjectStartDate" prefWidth="200" maxWidth="Infinity"
-                                style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 8px 12px;"/>
-                </VBox>
-
-                <VBox spacing="8" HBox.hgrow="ALWAYS">
-                    <Label text="Date de fin"
-                           style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-                    <DatePicker fx:id="ProjectEndDate" prefWidth="200" maxWidth="Infinity"
-                                style="-fx-background-color: white; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 8px 12px;"/>
-                </VBox>
-            </HBox>
-
-            <!-- Message d'erreur -->
-            <Label fx:id="errorLabel" textFill="#ef4444" wrapText="true" visible="false"
-                   style="-fx-font-size: 13px; -fx-background-color: #fee2e2; -fx-padding: 10px 14px; -fx-background-radius: 6px;"/>
-        </VBox>
-    </ScrollPane>
-
-    <!-- Pied de page avec boutons -->
-    <HBox spacing="12" alignment="CENTER_RIGHT"
-          style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0; -fx-background-radius: 0 0 12 12;">
-        <padding>
-            <Insets top="16" right="24" bottom="20" left="24"/>
-        </padding>
-
-        <Button text="Annuler" onAction="#handleCancel" minWidth="100"
-                style="-fx-background-color: white; -fx-text-fill: #475569; -fx-background-radius: 8px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-padding: 10px 24px; -fx-border-color: #cbd5e1; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-cursor: hand;">
-            <font>
-                <Font name="Segoe UI Semibold" size="14"/>
-            </font>
-        </Button>
-
-        <Button text="Enregistrer" onAction="#handleSave" minWidth="120"
-                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-padding: 10px 24px; -fx-cursor: hand;">
-            <font>
-                <Font name="Segoe UI Semibold" size="14"/>
-            </font>
-        </Button>
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#handleCancel" styleClass="button-outline" prefWidth="120" />
+        <Button text="Enregistrer" onAction="#handleSave" styleClass="button-primary" prefWidth="120" />
     </HBox>
 </VBox>

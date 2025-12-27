@@ -38,6 +38,10 @@ public class Task {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "project_id", nullable = true)
+    private Project project;
+
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
@@ -53,7 +57,7 @@ public class Task {
     }
 
     public Task(String title, String description, TaskStatus status, Priority priority, LocalDate deadline,
-            User assignee, Sprint sprint) {
+            User assignee, Sprint sprint, Project project) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -61,6 +65,7 @@ public class Task {
         this.deadline = deadline;
         this.assignee = assignee;
         this.sprint = sprint;
+        this.project = project;
     }
 
     public Long getId() {
@@ -127,6 +132,14 @@ public class Task {
         this.sprint = sprint;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public void addComment(Comment comment) {
         if (comments == null) {
             comments = new ArrayList<>();
@@ -170,6 +183,10 @@ public class Task {
         return logs;
     }
 
+    public void setLogs(List<TaskLog> logs) {
+        this.logs = logs;
+    }
+
     public List<Comment> getComments() {
         return comments;
     }
@@ -178,4 +195,26 @@ public class Task {
         return subtasks;
     }
 
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void setSubtasks(List<Subtask> subtasks) {
+        this.subtasks = subtasks;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Task task = (Task) o;
+        return id != null && id.equals(task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

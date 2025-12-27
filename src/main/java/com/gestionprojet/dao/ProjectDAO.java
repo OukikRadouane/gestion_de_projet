@@ -17,7 +17,8 @@ public class ProjectDAO {
             session.persist(project);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -29,7 +30,8 @@ public class ProjectDAO {
             session.merge(project);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -39,10 +41,12 @@ public class ProjectDAO {
         try (Session session = HibernateUtil.getSession()) {
             tx = session.beginTransaction();
             Project p = session.find(Project.class, project.getId());
-            if (p != null) session.remove(p);
+            if (p != null)
+                session.remove(p);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null)
+                tx.rollback();
             e.printStackTrace();
         }
     }
@@ -56,8 +60,8 @@ public class ProjectDAO {
     public List<Project> getAllProjectsByUser(User creator) {
         try (Session session = HibernateUtil.getSession()) {
             return session.createQuery(
-                            "FROM Project p WHERE p.creator = :creator ORDER BY p.createdAt DESC", Project.class)
-                    .setParameter("creator", creator)
+                    "FROM Project p WHERE p.creator.id = :creatorId ORDER BY p.createdAt DESC", Project.class)
+                    .setParameter("creatorId", creator.getId())
                     .getResultList();
         }
     }

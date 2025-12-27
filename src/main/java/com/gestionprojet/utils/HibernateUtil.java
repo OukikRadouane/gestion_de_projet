@@ -1,13 +1,16 @@
 package com.gestionprojet.utils;
 
 import com.gestionprojet.model.Project;
+import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
 import com.gestionprojet.model.Tasks.Comment;
 import com.gestionprojet.model.Tasks.Subtask;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskLog;
-
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -26,24 +29,27 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(Comment.class);
             configuration.addAnnotatedClass(Subtask.class);
             configuration.addAnnotatedClass(TaskLog.class);
+            configuration.addAnnotatedClass(Sprint.class);
 
             return configuration.buildSessionFactory();
         } catch (Throwable ex) {
             ex.printStackTrace();
             throw new ExceptionInInitializerError(
-                    "Erreur lors de la création de la SessionFactory : " + ex.getMessage()
-            );
+                    "Erreur lors de la création de la SessionFactory : " + ex.getMessage());
         }
     }
 
+    // 👉 Getter officiel pour la SessionFactory
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 
+    // 👉 Ouvrir une session
     public static Session getSession() {
         return sessionFactory.openSession();
     }
 
+    // 👉 Fermeture propre
     public static void shutdown() {
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();
