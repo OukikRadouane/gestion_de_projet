@@ -1,26 +1,17 @@
-module com.gestionprojet {
-    // Modules requis
-    requires static lombok;
-    requires transitive javafx.controls;
-    requires transitive javafx.fxml;
+module gestiondeprojet {
     requires jakarta.persistence;
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.graphics;
+    requires static lombok;
     requires org.hibernate.orm.core;
+    requires java.desktop;
     requires java.naming;
-    
-    // Ouvrir les packages pour la réflexion (FXML et Hibernate)
+    requires java.prefs; 
+
     opens com.gestionprojet to javafx.fxml;
-    opens com.gestionprojet.controller to javafx.fxml;
-    opens com.gestionprojet.model to org.hibernate.orm.core, javafx.base;
-    opens com.gestionprojet.model.enums to org.hibernate.orm.core;
-    opens com.gestionprojet.service to javafx.fxml; 
-    
-    // Exporter les packages
     exports com.gestionprojet;
+    opens com.gestionprojet.controller to javafx.fxml;
     exports com.gestionprojet.controller;
-    exports com.gestionprojet.model;
-    exports com.gestionprojet.model.enums;
-    exports com.gestionprojet.service; 
-    exports com.gestionprojet.repository;
-    exports com.gestionprojet.config;
-    exports com.gestionprojet.utils;
+    opens com.gestionprojet.model to org.hibernate.orm.core;
 }

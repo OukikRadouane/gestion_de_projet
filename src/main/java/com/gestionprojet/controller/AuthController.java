@@ -9,10 +9,12 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 public class AuthController {
     @FXML private TextField loginUsernameField;
     @FXML private PasswordField loginPasswordField;
+    @FXML private CheckBox rememberMeCheckBox;
     @FXML private Label loginErrorLabel;
 
     @FXML private TextField registerUsernameField;
@@ -20,9 +22,11 @@ public class AuthController {
     @FXML private PasswordField registerPasswordField;
     @FXML private PasswordField registerConfirmPasswordField;
     @FXML private ComboBox<com.gestionprojet.model.enums.Role> registerRoleComboBox;
+    @FXML private CheckBox termsCheckBox;
     @FXML private Label registerErrorLabel;
 
     private AuthService authService;
+    private Preferences prefs = Preferences.userNodeForPackage(AuthController.class);
 
     public void setAuthService(AuthService authService) {
         this.authService = authService;
@@ -34,6 +38,17 @@ public class AuthController {
             registerRoleComboBox.getItems().addAll(com.gestionprojet.model.enums.Role.values());
             registerRoleComboBox.setValue(com.gestionprojet.model.enums.Role.USER);
         }
+        
+        // Charger uniquement le nom d'utilisateur/email sauvegardé
+        if (loginUsernameField != null && rememberMeCheckBox != null) {
+            String savedUsername = prefs.get("savedUsername", "");
+            boolean rememberMe = prefs.getBoolean("rememberMe", false);
+            
+            if (rememberMe && !savedUsername.isEmpty()) {
+                loginUsernameField.setText(savedUsername);
+                rememberMeCheckBox.setSelected(true);
+            }
+        }
     }
 
     @FXML
@@ -43,12 +58,32 @@ public class AuthController {
             return;
         }
 
-        String usernameOrEmail = loginUsernameField.getText();
+        String usernameOrEmail = loginUsernameField.getText().trim();
         String password = loginPasswordField.getText();
 
+        // Validation des champs
+        if (usernameOrEmail.isEmpty()) {
+            showLoginError("Veuillez entrer votre nom d'utilisateur ou email");
+            return;
+        }
+
+        if (password.isEmpty()) {
+            showLoginError("Veuillez entrer votre mot de passe");
+            return;
+        }
+
         try {
-            
             authService.login(usernameOrEmail, password);
+            
+            // Sauvegarder uniquement le nom d'utilisateur/email si "Se souvenir de moi" est coché
+            if (rememberMeCheckBox.isSelected()) {
+                prefs.put("savedUsername", usernameOrEmail);
+                prefs.putBoolean("rememberMe", true);
+            } else {
+                prefs.remove("savedUsername");
+                prefs.putBoolean("rememberMe", false);
+            }
+            
             showDashboard();
         } catch (IllegalArgumentException e) {
             showLoginError(e.getMessage());
@@ -64,14 +99,46 @@ public class AuthController {
             return;
         }
 
-        String username = registerUsernameField.getText();
-        String email = registerEmailField.getText();
+        String username = registerUsernameField.getText().trim();
+        String email = registerEmailField.getText().trim();
         String password = registerPasswordField.getText();
         String confirmPassword = registerConfirmPasswordField.getText();
         com.gestionprojet.model.enums.Role role = registerRoleComboBox.getValue();
 
+        // Validation des champs vides
+        if (username.isEmpty()) {
+            showRegisterError("Le nom d'utilisateur est obligatoire");
+            return;
+        }
+
+        if (email.isEmpty()) {
+            showRegisterError("L'adresse email est obligatoire");
+            return;
+        }
+
+        if (password.isEmpty()) {
+            showRegisterError("Le mot de passe est obligatoire");
+            return;
+        }
+
+        if (confirmPassword.isEmpty()) {
+            showRegisterError("Veuillez confirmer votre mot de passe");
+            return;
+        }
+
+        // Validation de la longueur du mot de passe
+        if (password.length() < 8) {
+            showRegisterError("Le mot de passe doit contenir au moins 8 caractères");
+            return;
+        }
+
+        // Vérifier que les conditions sont acceptées
+        if (!termsCheckBox.isSelected()) {
+            showRegisterError("Vous devez accepter les conditions d'utilisation");
+            return;
+        }
+
         try {
-            
             authService.register(username, email, password, confirmPassword, role);
             showSuccess("Inscription réussie! Vous pouvez maintenant vous connecter.");
             showLoginView();
@@ -82,10 +149,12 @@ public class AuthController {
         }
     }
 
+
+
     @FXML
     private void showRegisterView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/register.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/register.fxml"));
             Parent root = loader.load();
 
             AuthController controller = loader.getController();
@@ -101,7 +170,7 @@ public class AuthController {
     @FXML
     private void showLoginView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
             Parent root = loader.load();
 
             AuthController controller = loader.getController();
@@ -116,11 +185,12 @@ public class AuthController {
 
     private void showDashboard() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dashboard.fxml"));
             Parent root = loader.load();
 
             com.gestionprojet.controller.DashboardController controller = loader.getController();
             controller.setAuthService(authService);
+            controller.setProjects(authService.getAllProjectsOfCurrentUser());
 
             Stage stage = (Stage) loginUsernameField.getScene().getWindow();
             stage.setScene(new Scene(root, 1000, 700));
@@ -143,10 +213,7 @@ public class AuthController {
             registerErrorLabel.setVisible(true);
         }
     }
-    public void handleForgotPassword() {
-       loginErrorLabel.setText("Fonctionnalité de réinitialisation de mot de passe à implémenter");
-       loginErrorLabel.setVisible(true);
-}
+
     private void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Succès");

@@ -42,13 +42,8 @@
                 </VBox>
 
                 <VBox spacing="6">
-                    <HBox alignment="CENTER_LEFT" spacing="0">
-                        <Label text="Mot de passe"
-                               style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Hyperlink text="Oublié?"
-                                  style="-fx-text-fill: #3b82f6; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif; -fx-cursor: hand; -fx-underline: false;"/>
-                    </HBox>
+                    <Label text="Mot de passe"
+                           style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
                     <PasswordField fx:id="loginPasswordField" promptText="Entrez votre mot de passe"
                                   style="-fx-background-color: #f8fafc; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-prompt-text-fill: #94a3b8; -fx-focus-color: #3b82f6;"
                                   prefWidth="330"/>

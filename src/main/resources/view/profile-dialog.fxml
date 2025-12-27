@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestionprojet.controller.ProfileDialogController"
+      spacing="20" style="-fx-background-color: white; -fx-padding: 25;">
+
+    <!-- En-tête -->
+    <VBox spacing="8">
+        <Label text="Modifier le profil"
+               style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 20px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+        <Label text="Mettez à jour vos informations personnelles"
+               style="-fx-text-fill: #64748b; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+    </VBox>
+
+    <Separator style="-fx-background-color: #e2e8f0;"/>
+
+    <!-- Formulaire -->
+    <VBox spacing="15">
+        <!-- Nom d'utilisateur (non modifiable) -->
+        <VBox spacing="6">
+            <Label text="Nom d'utilisateur"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+            <TextField fx:id="usernameField"
+                      style="-fx-background-color: #f1f5f9; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-opacity: 0.7;"
+                      editable="false" prefWidth="400"/>
+            <Label text="Le nom d'utilisateur ne peut pas être modifié"
+                   style="-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+        </VBox>
+
+        <!-- Email -->
+        <VBox spacing="6">
+            <Label text="Adresse email"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+            <TextField fx:id="emailField"
+                      style="-fx-background-color: #f8fafc; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-prompt-text-fill: #94a3b8;"
+                      prefWidth="400"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #e2e8f0;"/>
+
+        <Label text="Changer le mot de passe (optionnel)"
+               style="-fx-text-fill: #64748b; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-style: italic;"/>
+
+        <!-- Mot de passe actuel -->
+        <VBox spacing="6">
+            <Label text="Mot de passe actuel"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+            <PasswordField fx:id="currentPasswordField"
+                          promptText="Entrez votre mot de passe actuel"
+                          style="-fx-background-color: #f8fafc; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-prompt-text-fill: #94a3b8;"
+                          prefWidth="400"/>
+        </VBox>
+
+        <!-- Nouveau mot de passe -->
+        <VBox spacing="6">
+            <Label text="Nouveau mot de passe"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+            <PasswordField fx:id="newPasswordField"
+                          promptText="Nouveau mot de passe (min. 8 caractères)"
+                          style="-fx-background-color: #f8fafc; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-prompt-text-fill: #94a3b8;"
+                          prefWidth="400"/>
+        </VBox>
+
+        <!-- Confirmer mot de passe -->
+        <VBox spacing="6">
+            <Label text="Confirmer le nouveau mot de passe"
+                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+            <PasswordField fx:id="confirmPasswordField"
+                          promptText="Confirmez le nouveau mot de passe"
+                          style="-fx-background-color: #f8fafc; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-padding: 10px 14px; -fx-font-size: 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-prompt-text-fill: #94a3b8;"
+                          prefWidth="400"/>
+        </VBox>
+    </VBox>
+
+    <!-- Message d'erreur -->
+    <Label fx:id="errorLabel" text=""
+           style="-fx-text-fill: #7f1d1d; -fx-font-size: 13px; -fx-background-color: rgba(248, 113, 113, 0.1); -fx-background-radius: 6px; -fx-padding: 10px 14px; -fx-font-family: 'Segoe UI', sans-serif; -fx-border-color: rgba(248, 113, 113, 0.3); -fx-border-width: 1px; -fx-border-radius: 6px; -fx-wrap-text: true;"
+           visible="false" wrapText="true" maxWidth="400"/>
+
+    <!-- Boutons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#handleCancel"
+                style="-fx-background-color: #f1f5f9; -fx-text-fill: #64748b; -fx-background-radius: 8px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 10 20;"
+                prefWidth="120"/>
+        <Button text="Enregistrer" onAction="#handleSave"
+                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8px; -fx-font-weight: 600; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 10 20;"
+                prefWidth="120"/>
+    </HBox>
+</VBox>
