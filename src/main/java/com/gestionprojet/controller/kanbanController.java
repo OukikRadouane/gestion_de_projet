@@ -466,23 +466,30 @@ public class kanbanController {
                 try {
                     long taskId = Long.parseLong(dragboard.getString());
 
-                    // Trouver la tâche par ID
-                    for (Task task : tasks) {
-                        if (task.getId() == taskId) {
-                            // Mettre à jour le statut
-                            task.setStatus(targetStatus);
-                            task.addLog("Statut changé vers " + targetStatus, this.user);
+                    Task managedTask = taskDAO.getByIdWithCollections(taskId);
+                    if (managedTask != null) {
+                        managedTask.setStatus(targetStatus);
+                        managedTask.addLog("Statut changé vers " + targetStatus, this.user);
 
-                            // Sauvegarder en base de données
-                            taskDAO.update(task);
+                        taskDAO.update(managedTask);
 
-                            success = true;
-                            break;
+                        success = true;
+                    } else {
+                        for (Task task : tasks) {
+                            if (task.getId() == taskId) {
+                                try {
+                                    task.setStatus(targetStatus);
+                                    taskDAO.update(task);
+                                    success = true;
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                break;
+                            }
                         }
                     }
 
                     if (success) {
-                        // Recharger les tâches pour refléter le changement
                         reloadTasks();
                     }
                 } catch (NumberFormatException e) {
@@ -577,17 +584,8 @@ public class kanbanController {
             // Charger les sprints du projet
             List<Sprint> sprints = sprintDAO.getAllSprintsByProject(selectedProject);
             sprintCombo.setItems(FXCollections.observableArrayList(sprints));
-            // Ajouter une option "null" pour "Tous les sprints" si on veut,
-            // mais ComboBox gère le null selection comme "rien sélectionné" ou on peut
-            // ajouter un item fictif.
-            // Ici on va juste permettre de désélectionner ou sélectionner un sprint.
-            // Pour simplifier, on va dire que si on sélectionne un projet, on charge toutes
-            // les tâches du projet par défaut.
 
             sprintCombo.setDisable(false);
-
-            // Charger toutes les tâches du projet
-            // Charger toutes les tâches du projet
             reloadTasks();
         } else {
             this.project = null;
@@ -608,8 +606,6 @@ public class kanbanController {
             this.sprint = selectedSprint;
             reloadTasks();
         } else {
-            // Si aucun sprint sélectionné mais un projet est là, on réaffiche toutes les
-            // tâches du projet
             this.sprint = null;
             if (this.project != null) {
                 reloadTasks();

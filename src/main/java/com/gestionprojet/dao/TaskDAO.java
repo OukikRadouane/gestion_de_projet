@@ -129,6 +129,9 @@ public class TaskDAO {
                 Hibernate.initialize(task.getComments());
                 Hibernate.initialize(task.getSubtasks());
                 Hibernate.initialize(task.getLogs());
+                task.setComments(new java.util.ArrayList<>(task.getComments()));
+                task.setSubtasks(new java.util.ArrayList<>(task.getSubtasks()));
+                task.setLogs(new java.util.ArrayList<>(task.getLogs()));
             }
 
             return task;

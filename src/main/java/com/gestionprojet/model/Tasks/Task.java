@@ -170,12 +170,24 @@ public class Task {
         return logs;
     }
 
+    public void setLogs(List<TaskLog> logs) {
+        this.logs = logs;
+    }
+
     public List<Comment> getComments() {
         return comments;
     }
 
     public List<Subtask> getSubtasks() {
         return subtasks;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void setSubtasks(List<Subtask> subtasks) {
+        this.subtasks = subtasks;
     }
 
 }
