@@ -8,14 +8,12 @@ import com.gestionprojet.model.Tasks.TaskStatus;
 import com.gestionprojet.dao.ProjectDAO;
 import com.gestionprojet.dao.SprintDAO;
 import com.gestionprojet.dao.TaskDAO;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ClipboardContent;
@@ -27,10 +25,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,22 +34,25 @@ import java.util.List;
 
 public class kanbanController {
 
+    private VBox backlogColumn;
     private VBox todoColumn;
-    private VBox doingColumn;
+    private VBox inProgressColumn;
     private VBox doneColumn;
-    private Button addTaskButton;
     private BorderPane root;
     private Sprint sprint;
     private User user;
     private Project project;
     private List<Task> tasks;
 
-    private ComboBox<Project> projectCombo;
-    private ComboBox<Sprint> sprintCombo;
-
     private final TaskDAO taskDAO = new TaskDAO();
     private final ProjectDAO projectDAO = new ProjectDAO();
     private final SprintDAO sprintDAO = new SprintDAO();
+
+    public void setInitialContext(Project project, Sprint sprint) {
+        this.project = project;
+        this.sprint = sprint;
+        reloadTasks();
+    }
 
     public kanbanController() {
         this.tasks = new ArrayList<>();
@@ -64,16 +63,24 @@ public class kanbanController {
     }
 
     private void loadTasksForSprint() {
-        if (sprint != null) {
+        if (sprint != null && project != null) {
+            tasks = new ArrayList<>(taskDAO.getBySprint(sprint));
+            // Ajouter les tâches du backlog (non assignées à un sprint)
+            List<Task> backlogTasks = taskDAO.getByProject(project).stream()
+                    .filter(t -> t.getSprint() == null)
+                    .collect(java.util.stream.Collectors.toList());
+            tasks.addAll(backlogTasks);
+
+            System.out.println(
+                    "Chargement des tâches pour le sprint: " + sprint.getName() + ", total (sprint + backlog): "
+                            + tasks.size());
+        } else if (sprint != null) {
             tasks = taskDAO.getBySprint(sprint);
-            System.out.println("Chargement des tâches pour le sprint: " + sprint.getName() + ", nombre de tâches: "
-                    + tasks.size());
         } else {
             tasks = new ArrayList<>();
-            System.out.println("Aucun sprint défini, liste de tâches vide");
         }
 
-        if (todoColumn != null && doingColumn != null && doneColumn != null) {
+        if (todoColumn != null && inProgressColumn != null && doneColumn != null) {
             refreshColumns();
         }
     }
@@ -97,89 +104,74 @@ public class kanbanController {
 
     public BorderPane createView() {
         root = new BorderPane();
-        root.setPrefHeight(600);
-        root.setPrefWidth(900);
-        root.setStyle("-fx-background-color: #F9FAFB;");
+        root.setStyle("-fx-background-color: transparent;");
         root.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 
-        // Create top bar
-        root.setTop(createTopBar());
-
         // Create kanban columns
+        root.setTop(createTopBar());
         root.setCenter(createKanbanColumns());
 
+        setupDropTarget(backlogColumn, TaskStatus.BACKLOG);
         setupDropTarget(todoColumn, TaskStatus.TO_DO);
-        setupDropTarget(doingColumn, TaskStatus.DOING);
+        setupDropTarget(inProgressColumn, TaskStatus.IN_PROGRESS);
         setupDropTarget(doneColumn, TaskStatus.DONE);
 
         return root;
     }
 
-    private VBox createTopBar() {
-        VBox topBar = new VBox(15);
-        topBar.setStyle(
-                "-fx-background-color: white; -fx-border-color: transparent transparent #E5E7EB transparent; -fx-border-width: 0 0 1 0;");
-        topBar.setPadding(new Insets(25, 30, 25, 30));
+    private HBox createTopBar() {
+        HBox topBar = new HBox(20);
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setPadding(new Insets(20, 30, 0, 30));
+        topBar.setStyle("-fx-background-color: transparent;");
 
         Label titleLabel = new Label("Tableau Kanban");
         titleLabel.getStyleClass().add("h1");
 
-        HBox controls = new HBox(15);
-        controls.setAlignment(Pos.CENTER_LEFT);
-
-        projectCombo = new ComboBox<>();
-        projectCombo.setPromptText("Sélectionner un projet");
-        projectCombo.setPrefWidth(220);
-        projectCombo.setStyle("-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 6;");
-
-        sprintCombo = new ComboBox<>();
-        sprintCombo.setPromptText("Tous les sprints");
-        sprintCombo.setPrefWidth(220);
-        sprintCombo.setDisable(true);
-        sprintCombo.setStyle("-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 6;");
-
-        // Configuration des convertisseurs for project name display
-        projectCombo.setConverter(new StringConverter<Project>() {
-            @Override
-            public String toString(Project project) {
-                return project != null ? project.getName() : "";
-            }
-
-            @Override
-            public Project fromString(String string) {
-                return null;
-            }
-        });
-
-        sprintCombo.setConverter(new StringConverter<Sprint>() {
-            @Override
-            public String toString(Sprint sprint) {
-                return sprint != null ? sprint.getName() : "Tous les sprints";
-            }
-
-            @Override
-            public Sprint fromString(String string) {
-                return null;
-            }
-        });
-
-        loadProjects();
-
-        projectCombo.setOnAction(e -> handleProjectSelection());
-        sprintCombo.setOnAction(e -> handleSprintSelection());
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        addTaskButton = new Button("+ Nouvelle Tâche");
-        addTaskButton.getStyleClass().add("button-primary");
-        addTaskButton.setOnAction(e -> handleAddTask());
-        addTaskButton.setVisible(false);
+        Button btnAddTask = new Button("+ Ajouter une tâche");
+        btnAddTask.getStyleClass().add("button-primary");
+        btnAddTask.setOnAction(e -> handleAddTask());
 
-        controls.getChildren().addAll(projectCombo, sprintCombo, spacer, addTaskButton);
-        topBar.getChildren().addAll(titleLabel, controls);
+        Button btnCompleteSprint = new Button("Terminer le Sprint");
+        btnCompleteSprint.getStyleClass().add("button-outline");
+        btnCompleteSprint.setStyle("-fx-text-fill: #EF4444; -fx-border-color: #EF4444;");
+        btnCompleteSprint.setVisible(
+                sprint != null && sprint.getStatus() != com.gestionprojet.model.enums.SprintStatus.COMPLETED);
+        btnCompleteSprint.setOnAction(e -> handleCompleteSprint());
 
+        topBar.getChildren().addAll(titleLabel, spacer, btnAddTask, btnCompleteSprint);
         return topBar;
+    }
+
+    private void handleCompleteSprint() {
+        if (sprint == null)
+            return;
+
+        try {
+            // Logique de clôture du sprint
+            // Récupérer toutes les tâches du sprint
+            List<Task> sprintTasks = taskDAO.getBySprint(sprint);
+
+            for (Task t : sprintTasks) {
+                if (t.getStatus() != TaskStatus.DONE) {
+                    t.setSprint(null);
+                    t.setStatus(TaskStatus.BACKLOG);
+                    t.addLog("Sprint terminé - Tâche non terminée reportée au Backlog", user);
+                    taskDAO.update(t);
+                }
+            }
+
+            sprint.setStatus(com.gestionprojet.model.enums.SprintStatus.COMPLETED);
+            sprintDAO.update(sprint);
+
+            System.out.println("✅ Sprint terminé et tâches reportées.");
+            reloadTasks();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private HBox createKanbanColumns() {
@@ -188,19 +180,24 @@ public class kanbanController {
         columnsContainer.setPadding(new Insets(30));
 
         // Create columns with corresponding status titles
+        VBox backlogColumnContainer = createColumnContainer("BACKLOG", "#6B7281");
+        backlogColumn = createColumn();
+        addColumnToContainer(backlogColumnContainer, backlogColumn);
+
         VBox todoColumnContainer = createColumnContainer("À FAIRE", "#6B7280");
         todoColumn = createColumn();
         addColumnToContainer(todoColumnContainer, todoColumn);
 
-        VBox doingColumnContainer = createColumnContainer("EN COURS", "#3B82F6");
-        doingColumn = createColumn();
-        addColumnToContainer(doingColumnContainer, doingColumn);
+        VBox inProgressColumnContainer = createColumnContainer("EN COURS", "#3B82F6");
+        inProgressColumn = createColumn();
+        addColumnToContainer(inProgressColumnContainer, inProgressColumn);
 
         VBox doneColumnContainer = createColumnContainer("TERMINÉ", "#10B981");
         doneColumn = createColumn();
         addColumnToContainer(doneColumnContainer, doneColumn);
 
-        columnsContainer.getChildren().addAll(todoColumnContainer, doingColumnContainer, doneColumnContainer);
+        columnsContainer.getChildren().addAll(backlogColumnContainer, todoColumnContainer, inProgressColumnContainer,
+                doneColumnContainer);
 
         return columnsContainer;
     }
@@ -222,9 +219,35 @@ public class kanbanController {
                 "-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #4B5563; -fx-letter-spacing: 0.5px;");
 
         header.getChildren().addAll(dot, titleLabel);
-        columnContainer.getChildren().add(header);
 
+        columnContainer.getChildren().add(header);
         return columnContainer;
+    }
+
+    private void handleAddTask() {
+        if (project == null) {
+            System.err.println("Aucun projet sélectionné pour ajouter une tâche");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
+            Parent root = loader.load();
+
+            TaskDialogController controller = loader.getController();
+            controller.setProject(this.project);
+            controller.setSprint(this.sprint);
+            controller.setTask(null);
+
+            Stage stage = new Stage();
+            stage.setTitle("Nouvelle Tâche");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            reloadTasks();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private VBox createColumn() {
@@ -244,34 +267,6 @@ public class kanbanController {
         scrollPane.setFocusTraversable(false);
         scrollPane.setContent(column);
         container.getChildren().add(scrollPane);
-    }
-
-    private void handleAddTask() {
-        try {
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Ajouter une tâche");
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
-            Parent root = loader.load();
-
-            TaskDialogController dialogController = loader.getController();
-
-            // Passer le sprint actuel à la boîte de dialogue
-            dialogController.setSprint(sprint);
-            dialogController.setCurrentUser(this.user);
-            dialogStage.setScene(new Scene(root));
-            dialogStage.showAndWait();
-
-            // Recharger les tâches après ajout
-            // Recharger les tâches après ajout
-            reloadTasks();
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Erreur lors de l'ouverture de la boîte de dialogue d'ajout de tâche");
-        }
     }
 
     private void handleEditTask(Task task) {
@@ -313,14 +308,15 @@ public class kanbanController {
 
     private void refreshColumns() {
         // Vérifier que les colonnes existent
-        if (todoColumn == null || doingColumn == null || doneColumn == null) {
+        if (backlogColumn == null || todoColumn == null || inProgressColumn == null || doneColumn == null) {
             System.err.println("Les colonnes ne sont pas initialisées");
             return;
         }
 
         // Vider les colonnes
+        backlogColumn.getChildren().clear();
         todoColumn.getChildren().clear();
-        doingColumn.getChildren().clear();
+        inProgressColumn.getChildren().clear();
         doneColumn.getChildren().clear();
 
         // Vérifier que tasks n'est pas null
@@ -342,10 +338,11 @@ public class kanbanController {
                 }
 
                 switch (status) {
+                    case BACKLOG -> backlogColumn.getChildren().add(taskCard);
                     case TO_DO -> todoColumn.getChildren().add(taskCard);
-                    case DOING -> doingColumn.getChildren().add(taskCard);
+                    case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
                     case DONE -> doneColumn.getChildren().add(taskCard);
-                    default -> todoColumn.getChildren().add(taskCard);
+                    default -> backlogColumn.getChildren().add(taskCard);
                 }
             } catch (Exception e) {
                 System.err.println("Erreur lors de la création de la carte pour la tâche: " + task.getTitle());
@@ -362,52 +359,52 @@ public class kanbanController {
     }
 
     private VBox createTaskCard(Task task) {
-        VBox card = new VBox(8);
-        card.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-cursor: hand;");
-        card.setPadding(new Insets(10));
+        VBox card = new VBox(12);
+        card.getStyleClass().add("kanban-card");
+        card.setPrefWidth(280);
+        card.setCursor(javafx.scene.Cursor.HAND);
 
+        HBox titleRow = new HBox(8);
         Label titleLabel = new Label(task.getTitle());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #000000");
+        titleLabel.getStyleClass().add("h2");
         titleLabel.setWrapText(true);
+        titleLabel.setStyle("-fx-font-size: 14px;");
+        HBox.setHgrow(titleLabel, javafx.scene.layout.Priority.ALWAYS);
+        titleRow.getChildren().add(titleLabel);
 
-        Label descLabel = new Label(task.getDescription() != null ? task.getDescription() : "");
-        descLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12px;");
+        // Indicateur de retard
+        if (task.getDeadline() != null && task.getDeadline().isBefore(java.time.LocalDate.now())
+                && task.getStatus() != TaskStatus.DONE) {
+            Label lateLabel = new Label("EN RETARD");
+            lateLabel.setStyle(
+                    "-fx-background-color: #FEE2E2; -fx-text-fill: #EF4444; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 2 6; -fx-background-radius: 4;");
+            titleRow.getChildren().add(lateLabel);
+        }
+
+        Label descLabel = new Label(task.getDescription() != null ? task.getDescription() : "Aucune description");
+        descLabel.getStyleClass().add("small-text");
         descLabel.setWrapText(true);
+        descLabel.setMaxHeight(60);
 
-        // Action buttons
-        HBox buttonBox = new HBox(8);
-        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox footer = new HBox(8);
+        footer.setAlignment(Pos.CENTER_RIGHT);
 
-        Button deleteButton = new Button("Supprimer");
-        deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 10px;");
-        deleteButton.setOnAction(e -> {
-            try {
-                taskDAO.delete(task.getId());
-                taskDAO.delete(task.getId());
-                reloadTasks(); // Recharger après suppression
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                System.err.println("Erreur lors de la suppression de la tâche");
-            }
-        });
-        deleteButton.setOnMouseClicked(e -> e.consume());
+        // Priority tag (subtle)
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        Button editButton = new Button("Modifier");
-        editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 10px;");
-        editButton.setOnAction(e -> handleEditTask(task));
-        editButton.setOnMouseClicked(e -> e.consume());
+        Button editButton = new Button("Détails");
+        editButton.getStyleClass().add("button-outline");
+        editButton.setStyle("-fx-padding: 4 10; -fx-font-size: 11px;");
+        editButton.setOnAction(e -> openTaskDetails(task));
 
-        buttonBox.getChildren().addAll(editButton, deleteButton);
-        card.getChildren().addAll(titleLabel, descLabel, buttonBox);
+        footer.getChildren().addAll(spacer, editButton);
+        card.getChildren().addAll(titleRow, descLabel, footer);
 
-        // Make card draggable
         setupDragSource(card, task);
 
         card.setOnMouseClicked(e -> {
-            System.out.println("Click detected on task card. Count: " + e.getClickCount());
-            if (e.getClickCount() == 1) { // Simple clic pour ouvrir les détails
-                System.out.println("Single click detected. Opening details for task: " + task.getId());
+            if (e.getClickCount() == 1) {
                 openTaskDetails(task);
             }
         });
@@ -462,7 +459,18 @@ public class kanbanController {
                     Task managedTask = taskDAO.getByIdWithCollections(taskId);
                     if (managedTask != null) {
                         managedTask.setStatus(targetStatus);
-                        managedTask.addLog("Statut changé vers " + targetStatus, this.user);
+                        if (targetStatus == TaskStatus.BACKLOG) {
+                            managedTask.setSprint(null);
+                        } else if (managedTask.getSprint() == null && this.sprint != null) {
+                            // Si la tâche vient du backlog et est déplacée vers une colonne de sprint, lui
+                            // assigner le sprint actuel
+                            managedTask.setSprint(this.sprint);
+                        }
+                        managedTask.addLog("Statut changé vers " + targetStatus
+                                + (managedTask.getSprint() != null
+                                        ? " (Sprint: " + managedTask.getSprint().getName() + ")"
+                                        : ""),
+                                this.user);
 
                         taskDAO.update(managedTask);
 
@@ -538,7 +546,7 @@ public class kanbanController {
             tasks = new ArrayList<>();
         }
 
-        if (todoColumn != null && doingColumn != null && doneColumn != null) {
+        if (todoColumn != null && inProgressColumn != null && doneColumn != null) {
             refreshColumns();
         }
     }
@@ -548,61 +556,7 @@ public class kanbanController {
         this.sprint = null;
         this.project = null;
         this.tasks = new ArrayList<>();
-        if (projectCombo != null)
-            projectCombo.getSelectionModel().clearSelection();
-        if (sprintCombo != null) {
-            sprintCombo.getItems().clear();
-            sprintCombo.setDisable(true);
-        }
-        if (addTaskButton != null)
-            addTaskButton.setVisible(false);
         refreshColumns();
     }
 
-    private void loadProjects() {
-        List<Project> projects = projectDAO.getAllProjects(); // Ou filtrer par utilisateur si nécessaire
-        projectCombo.setItems(FXCollections.observableArrayList(projects));
-    }
-
-    private void handleProjectSelection() {
-        Project selectedProject = projectCombo.getValue();
-        if (selectedProject != null) {
-            this.project = selectedProject;
-            this.sprint = null; // Reset sprint selection
-
-            // Activer le bouton d'ajout
-            if (addTaskButton != null)
-                addTaskButton.setVisible(true);
-
-            // Charger les sprints du projet
-            List<Sprint> sprints = sprintDAO.getAllSprintsByProject(selectedProject);
-            sprintCombo.setItems(FXCollections.observableArrayList(sprints));
-
-            sprintCombo.setDisable(false);
-            reloadTasks();
-        } else {
-            this.project = null;
-            this.sprint = null;
-            sprintCombo.getItems().clear();
-            sprintCombo.setDisable(true);
-            if (addTaskButton != null)
-                addTaskButton.setVisible(false);
-            tasks.clear();
-            refreshColumns();
-        }
-    }
-
-    private void handleSprintSelection() {
-        Sprint selectedSprint = sprintCombo.getValue();
-        if (selectedSprint != null) {
-            this.sprint = selectedSprint;
-            this.sprint = selectedSprint;
-            reloadTasks();
-        } else {
-            this.sprint = null;
-            if (this.project != null) {
-                reloadTasks();
-            }
-        }
-    }
 }

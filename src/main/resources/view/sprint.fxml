@@ -17,15 +17,13 @@
 
     <VBox spacing="20">
         <VBox spacing="8">
-            <Label text="Nom du sprint" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-            <TextField fx:id="sprintName" promptText="Ex: Sprint 1, Final sprint..."
-                       style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+            <Label text="Nom du sprint" styleClass="label-strong" />
+            <TextField fx:id="sprintName" promptText="Ex: Sprint 1, Final sprint..." styleClass="input" />
         </VBox>
 
         <VBox spacing="8">
-            <Label text="Objectif du sprint" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-            <TextArea fx:id="sprintGoal" promptText="Décrivez l'objectif de ce sprint..." prefRowCount="3" wrapText="true"
-                      style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+            <Label text="Objectif du sprint" styleClass="label-strong" />
+            <TextArea fx:id="sprintGoal" promptText="Décrivez l'objectif de ce sprint..." prefRowCount="3" wrapText="true" styleClass="input" />
         </VBox>
 
         <GridPane hgap="20" vgap="15">
@@ -35,21 +33,18 @@
             </columnConstraints>
 
             <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                <Label text="Date de début" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <DatePicker fx:id="sprintStartDate" maxWidth="Infinity"
-                            style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Date de début" styleClass="label-strong" />
+                <DatePicker fx:id="sprintStartDate" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label text="Date de fin" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <DatePicker fx:id="sprintEndDate" maxWidth="Infinity"
-                            style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Date de fin" styleClass="label-strong" />
+                <DatePicker fx:id="sprintEndDate" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                <Label text="Statut" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <ComboBox fx:id="sprintStatus" maxWidth="Infinity"
-                          style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Statut" styleClass="label-strong" />
+                <ComboBox fx:id="sprintStatus" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="CENTER_LEFT">

@@ -1,6 +1,7 @@
 package com.gestionprojet.utils;
 
 import com.gestionprojet.model.Project;
+import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -28,11 +29,13 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(Comment.class);
             configuration.addAnnotatedClass(Subtask.class);
             configuration.addAnnotatedClass(TaskLog.class);
+            configuration.addAnnotatedClass(Sprint.class);
 
             return configuration.buildSessionFactory();
         } catch (Throwable ex) {
             ex.printStackTrace();
-            throw new ExceptionInInitializerError("Erreur lors de la création de la SessionFactory : " + ex.getMessage());
+            throw new ExceptionInInitializerError(
+                    "Erreur lors de la création de la SessionFactory : " + ex.getMessage());
         }
     }
 

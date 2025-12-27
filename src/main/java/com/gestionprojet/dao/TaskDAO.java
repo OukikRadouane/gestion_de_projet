@@ -99,7 +99,7 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.createQuery(
-                    "Select t From Task t Where t.sprint.project = :project Order By t.priority DESC, t.deadline",
+                    "Select t From Task t Where t.project = :project Order By t.priority DESC, t.deadline",
                     Task.class)
                     .setParameter("project", project)
                     .getResultList();

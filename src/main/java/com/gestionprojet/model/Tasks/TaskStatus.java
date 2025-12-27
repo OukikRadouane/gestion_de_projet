@@ -1,8 +1,9 @@
 package com.gestionprojet.model.Tasks;
 
 public enum TaskStatus {
+    BACKLOG("Backlog"),
     TO_DO("To Do"),
-    DOING("Doing"),
+    IN_PROGRESS("In Progress"),
     DONE("Done");
 
     private final String displayName;

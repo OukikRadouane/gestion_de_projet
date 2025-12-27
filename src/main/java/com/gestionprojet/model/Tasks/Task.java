@@ -38,6 +38,10 @@ public class Task {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
@@ -53,7 +57,7 @@ public class Task {
     }
 
     public Task(String title, String description, TaskStatus status, Priority priority, LocalDate deadline,
-            User assignee, Sprint sprint) {
+            User assignee, Sprint sprint, Project project) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -61,6 +65,7 @@ public class Task {
         this.deadline = deadline;
         this.assignee = assignee;
         this.sprint = sprint;
+        this.project = project;
     }
 
     public Long getId() {
@@ -125,6 +130,14 @@ public class Task {
 
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public void addComment(Comment comment) {

@@ -17,15 +17,13 @@
 
     <VBox spacing="15">
         <VBox spacing="8">
-            <Label text="Nom de la tâche" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-            <TextField fx:id="taskNameField" promptText="Nom de la tâche..."
-                       style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+            <Label text="Nom de la tâche" styleClass="label-strong" />
+            <TextField fx:id="taskNameField" promptText="Nom de la tâche..." styleClass="input" />
         </VBox>
 
         <VBox spacing="8">
-            <Label text="Description" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-            <TextArea fx:id="descriptionField" promptText="Décrivez la tâche..." prefRowCount="4"
-                      style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8; -fx-padding: 10;" />
+            <Label text="Description" styleClass="label-strong" />
+            <TextArea fx:id="descriptionField" promptText="Décrivez la tâche..." prefRowCount="4" styleClass="input" />
         </VBox>
 
         <GridPane hgap="20" vgap="15">
@@ -35,33 +33,28 @@
             </columnConstraints>
 
             <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                <Label text="Date limite" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <DatePicker fx:id="dueDatePicker" maxWidth="Infinity"
-                            style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Date limite" styleClass="label-strong" />
+                <DatePicker fx:id="dueDatePicker" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                <Label text="Assigné à" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <ComboBox fx:id="assigneChoice" maxWidth="Infinity"
-                          style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Assigné à" styleClass="label-strong" />
+                <ComboBox fx:id="assigneChoice" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                <Label text="Statut" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <ComboBox fx:id="statusChoice" maxWidth="Infinity"
-                          style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Statut" styleClass="label-strong" />
+                <ComboBox fx:id="statusChoice" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                <Label text="Priorité" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <ComboBox fx:id="priorityChoice" maxWidth="Infinity"
-                          style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Priorité" styleClass="label-strong" />
+                <ComboBox fx:id="priorityChoice" maxWidth="Infinity" styleClass="input" />
             </VBox>
         </GridPane>
     </VBox>
 
-    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
-           style="-fx-text-fill: #EF4444; -fx-font-size: 13px; -fx-background-color: #FEF2F2; -fx-padding: 8; -fx-background-radius: 6;" />
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-box" />
 
     <HBox spacing="15" alignment="CENTER_RIGHT">
         <Button text="Annuler" onAction="#handleCancel" styleClass="button-outline" prefWidth="120" />

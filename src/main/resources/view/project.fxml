@@ -35,21 +35,18 @@
             </columnConstraints>
 
             <VBox spacing="8" GridPane.columnIndex="0">
-                <Label text="Date de début" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <DatePicker fx:id="ProjectStartDate" maxWidth="Infinity"
-                            style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Date de début" styleClass="label-strong" />
+                <DatePicker fx:id="ProjectStartDate" maxWidth="Infinity" styleClass="input" />
             </VBox>
 
             <VBox spacing="8" GridPane.columnIndex="1">
-                <Label text="Date de fin" style="-fx-font-weight: 600; -fx-font-size: 13px;" />
-                <DatePicker fx:id="ProjectEndDate" maxWidth="Infinity"
-                            style="-fx-background-color: white; -fx-border-color: -fx-border; -fx-border-radius: 8;" />
+                <Label text="Date de fin" styleClass="label-strong" />
+                <DatePicker fx:id="ProjectEndDate" maxWidth="Infinity" styleClass="input" />
             </VBox>
         </GridPane>
     </VBox>
 
-    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
-           style="-fx-text-fill: #EF4444; -fx-font-size: 13px; -fx-background-color: #FEF2F2; -fx-padding: 8; -fx-background-radius: 6;" />
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-box" />
 
     <HBox spacing="15" alignment="CENTER_RIGHT">
         <Button text="Annuler" onAction="#handleCancel" styleClass="button-outline" prefWidth="120" />

@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestionprojet.controller.BacklogController"
       stylesheets="@../css/style.css"
       spacing="30">
     <padding>
@@ -25,15 +26,16 @@
                     <Label text="Priorisez vos tâches avant de les déplacer vers un sprint." styleClass="small-text" />
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="+ Ajouter au Backlog" styleClass="button-primary" />
+                <Button text="+ Ajouter au Backlog" styleClass="button-primary" onAction="#handleAddTask" />
             </HBox>
 
             <TableView fx:id="backlogTable" style="-fx-background-color: transparent; -fx-border-color: -fx-border; -fx-border-radius: 8;">
                 <columns>
-                    <TableColumn text="TITRE" prefWidth="300" />
-                    <TableColumn text="PRIORITÉ" prefWidth="120" />
-                    <TableColumn text="STATUT" prefWidth="120" />
-                    <TableColumn text="ASSIGNÉ" prefWidth="150" />
+                    <TableColumn fx:id="colTitle" text="TITRE" prefWidth="300" />
+                    <TableColumn fx:id="colPriority" text="PRIORITÉ" prefWidth="120" />
+                    <TableColumn fx:id="colDeadline" text="DEADLINE" prefWidth="120" />
+                    <TableColumn fx:id="colAssignee" text="ASSIGNÉ" prefWidth="150" />
+                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="150" />
                 </columns>
                 <placeholder>
                     <VBox alignment="CENTER" spacing="10">

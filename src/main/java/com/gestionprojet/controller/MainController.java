@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import java.io.IOException;
@@ -22,6 +23,11 @@ public class MainController {
     private Label lblUserRole;
 
     @FXML
+    private ComboBox<com.gestionprojet.model.Project> comboActiveProject;
+    @FXML
+    private ComboBox<com.gestionprojet.model.Sprint> comboActiveSprint;
+
+    @FXML
     private Button btnDashboard;
     @FXML
     private Button btnProjects;
@@ -35,7 +41,10 @@ public class MainController {
     private Button btnSettings;
 
     private AuthService authService;
+    private com.gestionprojet.dao.SprintDAO sprintDAO = new com.gestionprojet.dao.SprintDAO();
     private List<Button> menuButtons = new ArrayList<>();
+
+    private String currentViewFxml;
 
     @FXML
     public void initialize() {
@@ -45,6 +54,67 @@ public class MainController {
         menuButtons.add(btnBacklog);
         menuButtons.add(btnKanban);
         menuButtons.add(btnSettings);
+
+        setupContextSelectors();
+    }
+
+    private void setupContextSelectors() {
+        comboActiveProject.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(com.gestionprojet.model.Project p) {
+                return p != null ? p.getName() : "Aucun projet";
+            }
+
+            @Override
+            public com.gestionprojet.model.Project fromString(String s) {
+                return null;
+            }
+        });
+
+        comboActiveSprint.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(com.gestionprojet.model.Sprint s) {
+                return s != null ? s.getName() : "Aucun sprint";
+            }
+
+            @Override
+            public com.gestionprojet.model.Sprint fromString(String s) {
+                return null;
+            }
+        });
+
+        comboActiveProject.setOnAction(e -> {
+            loadSprintsForProject(comboActiveProject.getValue());
+            refreshCurrentView();
+        });
+
+        comboActiveSprint.setOnAction(e -> refreshCurrentView());
+    }
+
+    private void loadProjects() {
+        if (authService != null && authService.isLoggedIn()) {
+            List<com.gestionprojet.model.Project> projects = authService.getAllProjectsOfCurrentUser();
+            comboActiveProject.getItems().setAll(projects);
+            if (!projects.isEmpty() && comboActiveProject.getValue() == null) {
+                comboActiveProject.setValue(projects.get(0));
+            }
+        }
+    }
+
+    private void loadSprintsForProject(com.gestionprojet.model.Project project) {
+        if (project != null) {
+            List<com.gestionprojet.model.Sprint> sprints = sprintDAO.getAllSprintsByProject(project);
+            comboActiveSprint.getItems().setAll(sprints);
+            if (!sprints.isEmpty()) {
+                comboActiveSprint.setValue(sprints.get(0));
+            } else {
+                comboActiveSprint.setValue(null);
+            }
+            comboActiveSprint.setDisable(false);
+        } else {
+            comboActiveSprint.getItems().clear();
+            comboActiveSprint.setDisable(true);
+        }
     }
 
     public void setAuthService(AuthService authService) {
@@ -53,6 +123,7 @@ public class MainController {
             User user = authService.getCurrentUser();
             lblUserName.setText(user.getUsername());
             lblUserRole.setText(user.getRole().toString());
+            loadProjects();
         }
         showDashboard();
     }
@@ -66,22 +137,42 @@ public class MainController {
         }
     }
 
+    private void refreshCurrentView() {
+        if (currentViewFxml != null) {
+            // Re-load the current view with updated context
+            if (currentViewFxml.equals("KANBAN")) {
+                showKanban();
+            } else {
+                loadView(currentViewFxml, null);
+            }
+        }
+    }
+
     private void loadView(String fxmlPath, Button triggerButton) {
+        currentViewFxml = fxmlPath;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
 
-            // Inject service/user if needed
             Object controller = loader.getController();
             if (controller instanceof DashboardController) {
-                ((DashboardController) controller).setAuthService(authService);
+                DashboardController dc = (DashboardController) controller;
+                dc.setAuthService(authService);
+                // Dashboard also shows project list, might need to sync
             } else if (controller instanceof SprintsViewController) {
-                // SprintsViewController might need a project context,
-                // but let's see how it's handled normally.
+                SprintsViewController svc = (SprintsViewController) controller;
+                svc.setProject(comboActiveProject.getValue());
+                svc.setDashboardController(null);
+            } else if (controller instanceof BacklogController) {
+                BacklogController bc = (BacklogController) controller;
+                bc.setProject(comboActiveProject.getValue());
+                if (authService != null)
+                    bc.setCurrentUser(authService.getCurrentUser());
             }
 
             contentArea.getChildren().setAll(view);
-            setActiveButton(triggerButton);
+            if (triggerButton != null)
+                setActiveButton(triggerButton);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -94,9 +185,6 @@ public class MainController {
 
     @FXML
     private void showProjects() {
-        // For now projects might be part of dashboard or a separate view
-        // Reusing dashboard as project management for now if no separate project.fxml
-        // exists for listing
         loadView("/view/dashboard.fxml", btnProjects);
     }
 
@@ -107,19 +195,20 @@ public class MainController {
 
     @FXML
     private void showBacklog() {
-        // Backlog might be a filtered view of tasks or a new FXML
-        // For now, let's show an empty state or reuse a view
-        System.out.println("Show Backlog");
-        setActiveButton(btnBacklog);
+        loadView("/view/backlog.fxml", btnBacklog);
     }
 
     @FXML
     private void showKanban() {
+        currentViewFxml = "KANBAN";
         try {
             kanbanController controller = new kanbanController();
             if (authService != null) {
                 controller.setUser(authService.getCurrentUser());
             }
+            // Pass the active context
+            controller.setInitialContext(comboActiveProject.getValue(), comboActiveSprint.getValue());
+
             Parent kanbanView = controller.createView();
             contentArea.getChildren().setAll(kanbanView);
             setActiveButton(btnKanban);
@@ -139,14 +228,11 @@ public class MainController {
         if (authService != null) {
             authService.logout();
         }
-        // Need to switch back to login scene
-        // This logic is usually in the controller or a SceneManager
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
             Parent root = loader.load();
             AuthController controller = loader.getController();
             controller.setAuthService(authService);
-
             lblUserName.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();

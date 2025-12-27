@@ -154,8 +154,7 @@ public class SprintsViewController {
 
     @FXML
     private void handleBack() {
-        Stage stage = (Stage) projectNameLabel.getScene().getWindow();
-        stage.close();
+        // Obsolete in sidebar navigation
     }
 
     private void showSuccess(String message) {

@@ -18,13 +18,27 @@
             </padding>
 
             <!-- App Logo / Name -->
-            <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox alignment="CENTER_LEFT" spacing="8">
                 <padding>
-                    <Insets bottom="40" left="10"/>
+                    <Insets bottom="30" left="10"/>
                 </padding>
-                <Circle radius="12" styleClass="accent-circle"/>
-                <Label text="ProjectHub" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: -fx-text-primary;"/>
-            </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                     <Circle radius="12" styleClass="accent-circle"/>
+                     <Label text="ProjectHub" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: -fx-text-primary;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Active Context Selection -->
+            <VBox spacing="15" style="-fx-padding: 0 10 30 10;">
+                <VBox spacing="5">
+                    <Label text="PROJET ACTIF" styleClass="small-text" style="-fx-font-weight: 700; -fx-text-fill: -fx-text-secondary; -fx-font-size: 10px;"/>
+                    <ComboBox fx:id="comboActiveProject" promptText="Sélectionner..." maxWidth="Infinity" styleClass="input" style="-fx-padding: 8;"/>
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="SPRINT ACTIF" styleClass="small-text" style="-fx-font-weight: 700; -fx-text-fill: -fx-text-secondary; -fx-font-size: 10px;"/>
+                    <ComboBox fx:id="comboActiveSprint" promptText="Sélectionner..." maxWidth="Infinity" styleClass="input" style="-fx-padding: 8;"/>
+                </VBox>
+            </VBox>
 
             <!-- Navigation Links -->
             <VBox spacing="4" VBox.vgrow="ALWAYS">
