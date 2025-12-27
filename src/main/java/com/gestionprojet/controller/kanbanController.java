@@ -156,7 +156,7 @@ public class kanbanController {
         setupDropTarget(backlogColumn, TaskStatus.BACKLOG);
         setupDropTarget(reportedColumn, TaskStatus.BACKLOG); // Could be a special status, but Backlog is fine
         setupDropTarget(todoColumn, TaskStatus.TO_DO);
-        setupDropTarget(inProgressColumn, TaskStatus.IN_PROGRESS);
+        setupDropTarget(inProgressColumn, TaskStatus.DOING);
         setupDropTarget(doneColumn, TaskStatus.DONE);
 
         // Ensure the root fills the space
@@ -408,7 +408,7 @@ public class kanbanController {
                         switch (status) {
                             case BACKLOG -> backlogColumn.getChildren().add(taskCard);
                             case TO_DO -> todoColumn.getChildren().add(taskCard);
-                            case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
+                            case DOING -> inProgressColumn.getChildren().add(taskCard);
                             case DONE -> doneColumn.getChildren().add(taskCard);
                             default -> todoColumn.getChildren().add(taskCard);
                         }
@@ -431,7 +431,7 @@ public class kanbanController {
                         switch (status) {
                             case BACKLOG -> backlogColumn.getChildren().add(taskCard);
                             case TO_DO -> todoColumn.getChildren().add(taskCard);
-                            case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
+                            case DOING-> inProgressColumn.getChildren().add(taskCard);
                             case DONE -> doneColumn.getChildren().add(taskCard);
                             default -> backlogColumn.getChildren().add(taskCard);
                         }

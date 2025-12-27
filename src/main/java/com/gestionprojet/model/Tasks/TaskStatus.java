@@ -3,7 +3,7 @@ package com.gestionprojet.model.Tasks;
 public enum TaskStatus {
     BACKLOG("Backlog"),
     TO_DO("To Do"),
-    IN_PROGRESS("In Progress"),
+    DOING("DOING"),
     DONE("Done");
 
     private final String displayName;
