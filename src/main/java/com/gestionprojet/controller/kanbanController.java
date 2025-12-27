@@ -23,8 +23,10 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -97,7 +99,8 @@ public class kanbanController {
         root = new BorderPane();
         root.setPrefHeight(600);
         root.setPrefWidth(900);
-        root.setStyle("-fx-background-color: #f5f5f5;");
+        root.setStyle("-fx-background-color: #F9FAFB;");
+        root.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
 
         // Create top bar
         root.setTop(createTopBar());
@@ -109,38 +112,33 @@ public class kanbanController {
         setupDropTarget(doingColumn, TaskStatus.DOING);
         setupDropTarget(doneColumn, TaskStatus.DONE);
 
-        // Ne pas appeler refreshColumns ici, attendre que le sprint soit défini
         return root;
     }
 
     private VBox createTopBar() {
-        VBox topBar = new VBox();
-        topBar.setStyle("-fx-background-color: #2c3e50;");
-        topBar.setPadding(new Insets(15, 20, 15, 20));
+        VBox topBar = new VBox(15);
+        topBar.setStyle(
+                "-fx-background-color: white; -fx-border-color: transparent transparent #E5E7EB transparent; -fx-border-width: 0 0 1 0;");
+        topBar.setPadding(new Insets(25, 30, 25, 30));
 
-        Label titleLabel = new Label("Kanban Board");
-        titleLabel.setTextFill(Color.WHITE);
-        titleLabel.setFont(Font.font("System Bold", 24));
+        Label titleLabel = new Label("Tableau Kanban");
+        titleLabel.getStyleClass().add("h1");
 
-        // Afficher le nom du sprint si disponible
-        if (sprint != null) {
-            Label sprintLabel = new Label("Sprint: " + sprint.getName());
-            sprintLabel.setTextFill(Color.LIGHTGRAY);
-            sprintLabel.setFont(Font.font("System", 14));
-            topBar.getChildren().add(sprintLabel);
-        }
+        HBox controls = new HBox(15);
+        controls.setAlignment(Pos.CENTER_LEFT);
 
-        // Filtres
         projectCombo = new ComboBox<>();
         projectCombo.setPromptText("Sélectionner un projet");
-        projectCombo.setPrefWidth(200);
+        projectCombo.setPrefWidth(220);
+        projectCombo.setStyle("-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 6;");
 
         sprintCombo = new ComboBox<>();
         sprintCombo.setPromptText("Tous les sprints");
-        sprintCombo.setPrefWidth(200);
-        sprintCombo.setDisable(true); // Désactivé tant qu'aucun projet n'est choisi
+        sprintCombo.setPrefWidth(220);
+        sprintCombo.setDisable(true);
+        sprintCombo.setStyle("-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 6;");
 
-        // Configuration des convertisseurs pour l'affichage
+        // Configuration des convertisseurs for project name display
         projectCombo.setConverter(new StringConverter<Project>() {
             @Override
             public String toString(Project project) {
@@ -149,7 +147,7 @@ public class kanbanController {
 
             @Override
             public Project fromString(String string) {
-                return null; // Pas nécessaire pour ce cas d'utilisation
+                return null;
             }
         });
 
@@ -165,48 +163,40 @@ public class kanbanController {
             }
         });
 
-        // Chargement des projets
         loadProjects();
 
-        // Listeners
         projectCombo.setOnAction(e -> handleProjectSelection());
         sprintCombo.setOnAction(e -> handleSprintSelection());
 
-        HBox buttonContainer = new HBox(10);
-        buttonContainer.setAlignment(Pos.CENTER_LEFT);
-        buttonContainer.setPadding(new Insets(10, 0, 0, 0));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        addTaskButton = new Button("+ Add Task");
-        addTaskButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
+        addTaskButton = new Button("+ Nouvelle Tâche");
+        addTaskButton.getStyleClass().add("button-primary");
         addTaskButton.setOnAction(e -> handleAddTask());
-
-        // Cacher le bouton d'ajout si aucun projet n'est sélectionné
         addTaskButton.setVisible(false);
 
-        buttonContainer.getChildren().addAll(projectCombo, sprintCombo, addTaskButton);
-        topBar.getChildren().addAll(titleLabel, buttonContainer);
+        controls.getChildren().addAll(projectCombo, sprintCombo, spacer, addTaskButton);
+        topBar.getChildren().addAll(titleLabel, controls);
 
         return topBar;
     }
 
     private HBox createKanbanColumns() {
-        HBox columnsContainer = new HBox(15);
+        HBox columnsContainer = new HBox(25);
         columnsContainer.setAlignment(Pos.TOP_CENTER);
-        columnsContainer.setStyle("-fx-background-color: #f5f5f5;");
-        columnsContainer.setPadding(new Insets(20, 20, 20, 20));
+        columnsContainer.setPadding(new Insets(30));
 
-        // Create TODO column
-        VBox todoColumnContainer = createColumnContainer("TO DO");
+        // Create columns with corresponding status titles
+        VBox todoColumnContainer = createColumnContainer("À FAIRE", "#6B7280");
         todoColumn = createColumn();
         addColumnToContainer(todoColumnContainer, todoColumn);
 
-        // Create DOING column
-        VBox doingColumnContainer = createColumnContainer("DOING");
+        VBox doingColumnContainer = createColumnContainer("EN COURS", "#3B82F6");
         doingColumn = createColumn();
         addColumnToContainer(doingColumnContainer, doingColumn);
 
-        // Create DONE column
-        VBox doneColumnContainer = createColumnContainer("DONE");
+        VBox doneColumnContainer = createColumnContainer("TERMINÉ", "#10B981");
         doneColumn = createColumn();
         addColumnToContainer(doneColumnContainer, doneColumn);
 
@@ -215,29 +205,33 @@ public class kanbanController {
         return columnsContainer;
     }
 
-    private VBox createColumnContainer(String title) {
-        VBox columnContainer = new VBox(10);
+    private VBox createColumnContainer(String title, String accentColor) {
+        VBox columnContainer = new VBox(15);
         HBox.setHgrow(columnContainer, javafx.scene.layout.Priority.ALWAYS);
         columnContainer.setMaxWidth(Double.MAX_VALUE);
-        columnContainer.setPrefWidth(300);
-        columnContainer.setStyle("-fx-background-color: #ecf0f1; -fx-background-radius: 5;");
-        columnContainer.setPadding(new Insets(10, 10, 10, 10));
+        columnContainer.setPrefWidth(320);
+        columnContainer.setStyle("-fx-background-color: #F3F4F6; -fx-background-radius: 12;");
+        columnContainer.setPadding(new Insets(20));
 
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Circle dot = new Circle(4, Color.web(accentColor));
         Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+        titleLabel.setStyle(
+                "-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #4B5563; -fx-letter-spacing: 0.5px;");
 
-        columnContainer.getChildren().add(titleLabel);
+        header.getChildren().addAll(dot, titleLabel);
+        columnContainer.getChildren().add(header);
 
         return columnContainer;
     }
 
     private VBox createColumn() {
-        VBox column = new VBox(10);
+        VBox column = new VBox(12);
         column.setStyle("-fx-background-color: transparent;");
-        column.setMinHeight(400);
+        column.setMinHeight(500);
         column.setFillWidth(true);
-        column.setPadding(new Insets(5, 5, 5, 5));
-
         return column;
     }
 
@@ -246,10 +240,9 @@ public class kanbanController {
         scrollPane.setFitToWidth(true);
         VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         scrollPane.setStyle(
-                "-fx-background: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
+                "-fx-background: transparent; -fx-background-color: transparent; -fx-viewport-background-color: transparent; -fx-border-color: transparent;");
         scrollPane.setFocusTraversable(false);
         scrollPane.setContent(column);
-
         container.getChildren().add(scrollPane);
     }
 

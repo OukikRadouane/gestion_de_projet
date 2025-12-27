@@ -11,16 +11,25 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class AuthController {
-    @FXML private TextField loginUsernameField;
-    @FXML private PasswordField loginPasswordField;
-    @FXML private Label loginErrorLabel;
+    @FXML
+    private TextField loginUsernameField;
+    @FXML
+    private PasswordField loginPasswordField;
+    @FXML
+    private Label loginErrorLabel;
 
-    @FXML private TextField registerUsernameField;
-    @FXML private TextField registerEmailField;
-    @FXML private PasswordField registerPasswordField;
-    @FXML private PasswordField registerConfirmPasswordField;
-    @FXML private ComboBox<com.gestionprojet.model.enums.Role> registerRoleComboBox;
-    @FXML private Label registerErrorLabel;
+    @FXML
+    private TextField registerUsernameField;
+    @FXML
+    private TextField registerEmailField;
+    @FXML
+    private PasswordField registerPasswordField;
+    @FXML
+    private PasswordField registerConfirmPasswordField;
+    @FXML
+    private ComboBox<com.gestionprojet.model.enums.Role> registerRoleComboBox;
+    @FXML
+    private Label registerErrorLabel;
 
     private AuthService authService;
 
@@ -116,19 +125,19 @@ public class AuthController {
 
     private void showDashboard() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainLayout.fxml"));
             Parent root = loader.load();
 
-            com.gestionprojet.controller.DashboardController controller = loader.getController();
+            com.gestionprojet.controller.MainController controller = loader.getController();
             controller.setAuthService(authService);
-            controller.setProjects(authService.getAllProjectsOfCurrentUser());
-
 
             Stage stage = (Stage) loginUsernameField.getScene().getWindow();
-            stage.setScene(new Scene(root, 1000, 700));
-            stage.setTitle("Project Manager - Dashboard");
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.setTitle("ProjectHub - Gestion de Projet");
+            stage.centerOnScreen();
         } catch (IOException e) {
-            showLoginError("Erreur lors du chargement du tableau de bord");
+            e.printStackTrace();
+            showLoginError("Erreur lors du chargement de l'application principale");
         }
     }
 
@@ -145,10 +154,12 @@ public class AuthController {
             registerErrorLabel.setVisible(true);
         }
     }
+
     public void handleForgotPassword() {
         loginErrorLabel.setText("Fonctionnalité de réinitialisation de mot de passe à implémenter");
         loginErrorLabel.setVisible(true);
     }
+
     private void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Succès");

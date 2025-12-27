@@ -3,82 +3,37 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="12"
       fx:controller="com.gestionprojet.controller.SprintCardController"
-      style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-color: #e2e8f0; -fx-border-width: 1.5px; -fx-border-radius: 10px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);">
-    <padding>
-        <Insets top="16" right="16" bottom="16" left="16"/>
-    </padding>
-
-    <!-- En-tête de la carte -->
-    <VBox spacing="8">
-        <Label fx:id="sprintNameLabel" text="Nom du sprint"
-               style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-        <HBox spacing="8" alignment="CENTER_LEFT">
-            <Label text="Date de début:"
-                   style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-            <Label fx:id="startDateLabel" text="01/01/2024"
-                   style="-fx-text-fill: #3b82f6; -fx-font-weight: 600; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+      styleClass="card" spacing="15">
+    
+    <VBox spacing="5">
+        <HBox alignment="TOP_LEFT">
+            <Label fx:id="sprintNameLabel" text="Sprint Name" styleClass="h2" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+            <Label fx:id="statusLabel" text="Planifié" 
+                   style="-fx-background-color: #DBEAFE; -fx-text-fill: #2563EB; -fx-padding: 4 8; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: 700;" />
         </HBox>
+        <Label fx:id="goalLabel" text="Sprint goal details..." styleClass="small-text" wrapText="true" minHeight="40" />
     </VBox>
 
-    <Separator style="-fx-background-color: #e2e8f0; -fx-padding: 0;"/>
+    <Separator style="-fx-background-color: -fx-border; -fx-opacity: 0.5;" />
 
-    <!-- Objectif du sprint -->
-    <VBox spacing="4">
-        <Label text="Objectif (Sprint Goal)"
-               style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif; -fx-font-weight: 600;"/>
-        <Label fx:id="goalLabel" text="Objectif du sprint"
-               style="-fx-text-fill: #475569; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif; -fx-wrap-text: true;" wrapText="true"
-               maxHeight="60"/>
-    </VBox>
-
-    <Separator style="-fx-background-color: #e2e8f0; -fx-padding: 0;"/>
-
-    <!-- Informations supplémentaires -->
-    <HBox spacing="16">
-        <VBox spacing="4" HBox.hgrow="ALWAYS">
-            <Label text="Date de fin"
-                   style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-            <Label fx:id="endDateLabel" text="31/12/2024"
-                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+    <HBox spacing="20">
+        <VBox spacing="2">
+            <Label text="DÉBUT" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
+            <Label fx:id="startDateLabel" text="01/01/2024" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
         </VBox>
-        <VBox spacing="4" HBox.hgrow="ALWAYS">
-            <Label text="Durée"
-                   style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-            <Label fx:id="durationLabel" text="14 jours"
-                   style="-fx-text-fill: #1e293b; -fx-font-weight: 600; -fx-font-size: 13px; -fx-font-family: 'Segoe UI', sans-serif;"/>
+        <VBox spacing="2">
+            <Label text="DURÉE" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
+            <Label fx:id="durationLabel" text="14 jours" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
         </VBox>
     </HBox>
 
-    <Separator style="-fx-background-color: #e2e8f0; -fx-padding: 0;"/>
-
-    <!-- Statut -->
-    <HBox spacing="8" alignment="CENTER_LEFT">
-        <Label text="Statut:"
-               style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-family: 'Segoe UI', sans-serif;"/>
-        <HBox alignment="CENTER_LEFT">
-            <Label fx:id="statusLabel" text="Planifié"
-                   style="-fx-text-fill: white; -fx-font-weight: 600; -fx-font-size: 11px; -fx-font-family: 'Segoe UI', sans-serif; -fx-background-color: #3b82f6; -fx-background-radius: 4px; -fx-padding: 4 8;"/>
-        </HBox>
-    </HBox>
-
-    <Separator style="-fx-background-color: #e2e8f0; -fx-padding: 0;"/>
-
-    <!-- Boutons d'action -->
-    <HBox spacing="8" alignment="CENTER_RIGHT">
-        <Button text="Modifier" onAction="#handleEdit"
-                style="-fx-background-color: transparent; -fx-text-fill: #f59e0b; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 6 12; -fx-border-radius: 6px; -fx-border-color: #f59e0b; -fx-border-width: 1px;"
-                focusTraversable="false"/>
-        <Button text="Supprimer" onAction="#handleDelete"
-                style="-fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 6 12; -fx-border-radius: 6px; -fx-border-color: #ef4444; -fx-border-width: 1px;"
-                focusTraversable="false"/>
-        <Button text="Tasks" onAction="#handleManageTasks"
-                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand; -fx-font-family: 'Segoe UI', sans-serif; -fx-padding: 6 12; -fx-border-radius: 6px;"
-                focusTraversable="false"/>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Tasks" onAction="#handleManageTasks" styleClass="button-primary" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
+        <Button text="Modifier" onAction="#handleEdit" styleClass="button-outline" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
+        <Button text="Supprimer" onAction="#handleDelete" 
+                style="-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand;" />
     </HBox>
 </VBox>
-

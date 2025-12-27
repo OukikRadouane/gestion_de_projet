@@ -1,0 +1,178 @@
+/* Global variables */
+.root {
+    -fx-bg-primary: #FFFFFF;
+    -fx-bg-secondary: #F9FAFB;
+    -fx-text-primary: #111827;
+    -fx-text-secondary: #6B7280;
+    -fx-accent: #10B981;
+    -fx-accent-hover: #059669;
+    -fx-border: #E5E7EB;
+
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    -fx-background-color: -fx-bg-primary;
+    -fx-border-color: transparent -fx-border transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-item {
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: #F3F4F6;
+}
+
+.sidebar-item-active {
+    -fx-background-color: #ECFDF5;
+}
+
+.sidebar-item-text {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+}
+
+.sidebar-item-active .sidebar-item-text {
+    -fx-text-fill: -fx-accent;
+    -fx-font-weight: 600;
+}
+
+/* Cards */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 4);
+    -fx-border-color: -fx-border;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 15, 0, 0, 8);
+}
+
+/* Buttons */
+.button-primary {
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.button-primary:hover {
+    -fx-background-color: -fx-accent-hover;
+}
+
+.button-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 500;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.button-outline:hover {
+    -fx-background-color: #F9FAFB;
+}
+
+/* Kanban */
+.kanban-column {
+    -fx-background-color: #F3F4F6;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+}
+
+.kanban-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 4, 0, 0, 2);
+    -fx-border-color: -fx-border;
+    -fx-border-radius: 8;
+}
+
+/* Typography */
+.h1 {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.h2 {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.small-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* Authentication & Login specific */
+.root-pane {
+    -fx-background-color: -fx-bg-secondary;
+}
+
+.accent-circle {
+    -fx-fill: -fx-accent;
+}
+
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.label-strong {
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.input {
+    -fx-background-color: white;
+    -fx-border-color: -fx-border;
+    -fx-border-radius: 8;
+    -fx-padding: 12;
+}
+
+.input:focused {
+    -fx-border-color: -fx-accent;
+}
+
+.link {
+    -fx-text-fill: -fx-accent;
+    -fx-font-size: 13px;
+    -fx-padding: 0;
+}
+
+.link-strong {
+    -fx-text-fill: -fx-accent;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-padding: 0;
+}
+
+.error-box {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 13px;
+    -fx-background-color: #FEF2F2;
+    -fx-padding: 10;
+    -fx-background-radius: 8;
+    -fx-border-color: #FCA5A5;
+    -fx-border-width: 1;
+}
