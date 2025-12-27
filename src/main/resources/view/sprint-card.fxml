@@ -25,12 +25,17 @@
             <Label fx:id="startDateLabel" text="01/01/2024" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
         </VBox>
         <VBox spacing="2">
+            <Label text="FIN" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
+            <Label fx:id="endDateLabel" text="15/01/2024" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
+        </VBox>
+        <VBox spacing="2">
             <Label text="DURÉE" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
             <Label fx:id="durationLabel" text="14 jours" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
         </VBox>
     </HBox>
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Voir Tâches" onAction="#handleViewTasks" styleClass="button-primary" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
         <Button text="Modifier" onAction="#handleEdit" styleClass="button-outline" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
         <Button text="Supprimer" onAction="#handleDelete" 
                 style="-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand;" />

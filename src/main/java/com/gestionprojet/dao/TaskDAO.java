@@ -7,6 +7,7 @@ import com.gestionprojet.utils.HibernateUtil;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskDAO {
@@ -83,26 +84,36 @@ public class TaskDAO {
     }
 
     public List<Task> getBySprint(Sprint sprint) {
+        if (sprint == null || sprint.getId() == null)
+            return new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            return session
-                    .createQuery("Select t From Task t Where t.sprint= :sprint Order By t.priority DESC, t.deadline",
+            List<Task> result = session
+                    .createQuery(
+                            "SELECT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project WHERE t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
                             Task.class)
-                    .setParameter("sprint", sprint).getResultList();
+                    .setParameter("sprintId", sprint.getId()).getResultList();
+            System.out.println(
+                    "TaskDAO: getBySprint(ID=" + sprint.getId() + ") -> " + result.size() + " tâches trouvées");
+            return result;
         } finally {
             session.close();
         }
-
     }
 
     public List<Task> getByProject(Project project) {
+        if (project == null || project.getId() == null)
+            return new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            return session.createQuery(
-                    "Select t From Task t Where t.project = :project Order By t.priority DESC, t.deadline",
+            List<Task> result = session.createQuery(
+                    "SELECT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint WHERE t.project.id = :projectId ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("project", project)
+                    .setParameter("projectId", project.getId())
                     .getResultList();
+            System.out.println(
+                    "TaskDAO: getByProject(ID=" + project.getId() + ") -> " + result.size() + " tâches trouvées");
+            return result;
         } finally {
             session.close();
         }
@@ -112,10 +123,35 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.createQuery(
-                    "Select t From Task t Where t.sprint= :sprint and t.status= :status Order By t.priority DESC, t.deadline",
-                    Task.class).setParameter("sprint", sprint).setParameter("status", status).getResultList();
+                    "Select t From Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project Where t.sprint.id = :sprintId and t.status= :status Order By t.priority DESC, t.deadline",
+                    Task.class).setParameter("sprintId", sprint.getId()).setParameter("status", status).getResultList();
         } finally {
             session.close();
+        }
+    }
+
+    public List<Task> getByProjectAndSprint(Project project, Sprint sprint) {
+        if (project == null || project.getId() == null || sprint == null || sprint.getId() == null)
+            return new ArrayList<>();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project WHERE t.project.id = :projectId AND t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
+                    Task.class)
+                    .setParameter("projectId", project.getId())
+                    .setParameter("sprintId", sprint.getId())
+                    .getResultList();
+        }
+    }
+
+    public List<Task> getBacklogByProject(Project project) {
+        if (project == null || project.getId() == null)
+            return new ArrayList<>();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint WHERE t.project.id = :projectId AND t.sprint IS NULL ORDER BY t.priority DESC, t.deadline",
+                    Task.class)
+                    .setParameter("projectId", project.getId())
+                    .getResultList();
         }
     }
 

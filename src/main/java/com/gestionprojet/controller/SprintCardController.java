@@ -97,6 +97,13 @@ public class SprintCardController {
     }
 
     @FXML
+    private void handleViewTasks() {
+        if (sprintsViewController != null && currentSprint != null) {
+            sprintsViewController.navigateToKanban(currentSprint);
+        }
+    }
+
+    @FXML
     private void handleEdit() {
         if (sprintsViewController != null && currentSprint != null) {
             sprintsViewController.editSprint(currentSprint);

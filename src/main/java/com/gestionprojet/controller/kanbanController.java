@@ -5,7 +5,6 @@ import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
-import com.gestionprojet.dao.ProjectDAO;
 import com.gestionprojet.dao.SprintDAO;
 import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXMLLoader;
@@ -28,9 +27,9 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class kanbanController {
 
@@ -45,7 +44,6 @@ public class kanbanController {
     private List<Task> tasks;
 
     private final TaskDAO taskDAO = new TaskDAO();
-    private final ProjectDAO projectDAO = new ProjectDAO();
     private final SprintDAO sprintDAO = new SprintDAO();
 
     public void setInitialContext(Project project, Sprint sprint) {
@@ -64,23 +62,57 @@ public class kanbanController {
 
     private void loadTasksForSprint() {
         if (sprint != null && project != null) {
-            tasks = new ArrayList<>(taskDAO.getBySprint(sprint));
-            // Ajouter les tâches du backlog (non assignées à un sprint)
-            List<Task> backlogTasks = taskDAO.getByProject(project).stream()
-                    .filter(t -> t.getSprint() == null)
-                    .collect(java.util.stream.Collectors.toList());
-            tasks.addAll(backlogTasks);
+            System.out.println("Kanban: Chargement des tâches pour Sprint ID=" + sprint.getId() + " dans le Projet ID="
+                    + project.getId());
 
-            System.out.println(
-                    "Chargement des tâches pour le sprint: " + sprint.getName() + ", total (sprint + backlog): "
-                            + tasks.size());
-        } else if (sprint != null) {
-            tasks = taskDAO.getBySprint(sprint);
+            // 1. Récupérer toutes les tâches liées au sprint (même si certaines tâches
+            // n'ont pas de référence project remplie avant la refonte)
+            List<Task> sprintTasks = taskDAO.getBySprint(sprint);
+
+            // Filtrer : conserver les tâches qui appartiennent au projet sélectionné
+            // ou celles dont le champ project est null (anciennes tâches migrées)
+            List<Task> filteredSprintTasks = new ArrayList<>();
+            for (Task t : sprintTasks) {
+                boolean keep = false;
+                try {
+                    if (t.getProject() == null) {
+                        keep = true;
+                    } else {
+                        Long pid = null;
+                        try {
+                            pid = t.getProject().getId();
+                        } catch (Exception ex) {
+                            // Si l'accès au projet échoue (lazy init / absence), considérer comme
+                            // non-appartient
+                            pid = null;
+                        }
+                        if (pid != null && pid.equals(project.getId())) {
+                            keep = true;
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (keep) {
+                    filteredSprintTasks.add(t);
+                }
+            }
+
+            // Tâches du sprint uniquement
+            this.tasks = filteredSprintTasks;
+
+            System.out.println("Kanban: Mode Sprint - Tâches associées=" + tasks.size() +
+                    " (sur " + sprintTasks.size() + " brutes)");
+        } else if (project != null) {
+            System.out.println("Kanban: Pas de sprint sélectionné, chargement de toutes les tâches du Projet ID="
+                    + project.getId());
+            this.tasks = taskDAO.getByProject(project);
+            System.out.println("Kanban: Total tâches projet=" + tasks.size());
         } else {
-            tasks = new ArrayList<>();
+            this.tasks = new ArrayList<>();
         }
 
-        if (todoColumn != null && inProgressColumn != null && doneColumn != null) {
+        if (todoColumn != null && inProgressColumn != null && doneColumn != null && backlogColumn != null) {
             refreshColumns();
         }
     }
@@ -95,14 +127,14 @@ public class kanbanController {
         if (sprint != null) {
             loadTasksForSprint();
         } else if (project != null) {
-            loadTasksByProject(project.getId());
+            loadTasksByProject();
         } else {
             tasks = new ArrayList<>();
             refreshColumns();
         }
     }
 
-    public BorderPane createView() {
+    public Parent createView() {
         root = new BorderPane();
         root.setStyle("-fx-background-color: transparent;");
         root.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
@@ -115,6 +147,12 @@ public class kanbanController {
         setupDropTarget(todoColumn, TaskStatus.TO_DO);
         setupDropTarget(inProgressColumn, TaskStatus.IN_PROGRESS);
         setupDropTarget(doneColumn, TaskStatus.DONE);
+
+        // Ensure the root fills the space
+        root.setPrefWidth(Double.MAX_VALUE);
+        root.setPrefHeight(Double.MAX_VALUE);
+
+        refreshColumns();
 
         return root;
     }
@@ -174,7 +212,7 @@ public class kanbanController {
         }
     }
 
-    private HBox createKanbanColumns() {
+    private Parent createKanbanColumns() {
         HBox columnsContainer = new HBox(25);
         columnsContainer.setAlignment(Pos.TOP_CENTER);
         columnsContainer.setPadding(new Insets(30));
@@ -199,7 +237,15 @@ public class kanbanController {
         columnsContainer.getChildren().addAll(backlogColumnContainer, todoColumnContainer, inProgressColumnContainer,
                 doneColumnContainer);
 
-        return columnsContainer;
+        // Wrap in ScrollPane for horizontal scrolling if window is too small
+        ScrollPane boardScroll = new ScrollPane(columnsContainer);
+        boardScroll.setFitToHeight(true);
+        boardScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        boardScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        boardScroll.setStyle(
+                "-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+
+        return boardScroll;
     }
 
     private VBox createColumnContainer(String title, String accentColor) {
@@ -269,43 +315,6 @@ public class kanbanController {
         container.getChildren().add(scrollPane);
     }
 
-    private void handleEditTask(Task task) {
-        try {
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Modifier une tâche");
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
-            Parent root = loader.load();
-
-            TaskDialogController dialogController = loader.getController();
-
-            // Recharger la tâche avec ses collections initialisées pour éviter
-            // LazyInitializationException
-            Task fullTask = taskDAO.getByIdWithCollections(task.getId());
-            if (fullTask != null) {
-                dialogController.setTask(fullTask);
-            } else {
-                dialogController.setTask(task); // Fallback
-            }
-
-            dialogController.setSprint(sprint); // Passer le sprint actuel
-            dialogController.setCurrentUser(this.user);
-
-            dialogStage.setScene(new Scene(root));
-            dialogStage.showAndWait();
-
-            // Recharger les tâches après édition
-            // Recharger les tâches après édition
-            reloadTasks();
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Erreur lors de l'ouverture de la boîte de dialogue de modification de tâche");
-        }
-    }
-
     private void refreshColumns() {
         // Vérifier que les colonnes existent
         if (backlogColumn == null || todoColumn == null || inProgressColumn == null || doneColumn == null) {
@@ -321,28 +330,46 @@ public class kanbanController {
 
         // Vérifier que tasks n'est pas null
         if (tasks == null) {
-            System.err.println("La liste des tâches est null");
             tasks = new ArrayList<>();
         }
 
-        System.out.println("Rafraîchissement des colonnes avec " + tasks.size() + " tâches");
+        System.out.println("Kanban: Distribution de " + tasks.size() + " tâches dans les colonnes.");
 
         // Ajouter les tâches aux colonnes appropriées
         for (Task task : tasks) {
             try {
                 VBox taskCard = createTaskCard(task);
-                TaskStatus status = task.getStatus();
+                TaskStatus status = task.getStatus() != null ? task.getStatus() : TaskStatus.TO_DO;
 
-                if (status == null) {
-                    status = TaskStatus.TO_DO; // Valeur par défaut
+                // Si un sprint est actif, on applique un filtrage strict pour les colonnes
+                // Sprint
+                if (this.sprint != null) {
+                    // Si la tâche appartient au sprint actif courant
+                    if (task.getSprint() != null && task.getSprint().getId().equals(this.sprint.getId())) {
+                        switch (status) {
+                            case BACKLOG -> backlogColumn.getChildren().add(taskCard);
+                            case TO_DO -> todoColumn.getChildren().add(taskCard);
+                            case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
+                            case DONE -> doneColumn.getChildren().add(taskCard);
+                            default -> todoColumn.getChildren().add(taskCard);
+                        }
+                    }
+                    // Si la tâche n'a pas de sprint, elle va d'office dans le backlog
+                    else if (task.getSprint() == null) {
+                        backlogColumn.getChildren().add(taskCard);
+                    }
+                    // Les tâches appartenant à d'autres sprints ne sont pas affichées (déjà
+                    // filtrées à la charge)
                 }
-
-                switch (status) {
-                    case BACKLOG -> backlogColumn.getChildren().add(taskCard);
-                    case TO_DO -> todoColumn.getChildren().add(taskCard);
-                    case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
-                    case DONE -> doneColumn.getChildren().add(taskCard);
-                    default -> backlogColumn.getChildren().add(taskCard);
+                // Mode Global Projet (pas de sprint actif sélectionné)
+                else {
+                    switch (status) {
+                        case BACKLOG -> backlogColumn.getChildren().add(taskCard);
+                        case TO_DO -> todoColumn.getChildren().add(taskCard);
+                        case IN_PROGRESS -> inProgressColumn.getChildren().add(taskCard);
+                        case DONE -> doneColumn.getChildren().add(taskCard);
+                        default -> backlogColumn.getChildren().add(taskCard);
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Erreur lors de la création de la carte pour la tâche: " + task.getTitle());
@@ -379,6 +406,14 @@ public class kanbanController {
             lateLabel.setStyle(
                     "-fx-background-color: #FEE2E2; -fx-text-fill: #EF4444; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 2 6; -fx-background-radius: 4;");
             titleRow.getChildren().add(lateLabel);
+        }
+
+        // Tag de sprint si en mode projet global
+        if (this.sprint == null && task.getSprint() != null) {
+            Label sprintTag = new Label(task.getSprint().getName());
+            sprintTag.setStyle(
+                    "-fx-background-color: #E0E7FF; -fx-text-fill: #4338CA; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 2 6; -fx-background-radius: 4;");
+            titleRow.getChildren().add(sprintTag);
         }
 
         Label descLabel = new Label(task.getDescription() != null ? task.getDescription() : "Aucune description");
@@ -539,9 +574,9 @@ public class kanbanController {
     }
 
     // Méthode pour charger les tâches par projet (optionnel)
-    public void loadTasksByProject(Long projectId) {
-        if (projectId != null) {
-            tasks = taskDAO.getByProject(project);
+    public void loadTasksByProject() {
+        if (project != null) {
+            tasks = taskDAO.getByProject(this.project);
         } else {
             tasks = new ArrayList<>();
         }

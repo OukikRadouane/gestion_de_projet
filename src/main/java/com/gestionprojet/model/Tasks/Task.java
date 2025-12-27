@@ -38,8 +38,8 @@ public class Task {
     @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "project_id", nullable = true)
     private Project project;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -203,4 +203,18 @@ public class Task {
         this.subtasks = subtasks;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Task task = (Task) o;
+        return id != null && id.equals(task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }
