@@ -14,7 +14,7 @@
             <Insets top="20" right="20" bottom="20" left="20"/>
         </padding>
 
-        <VBox alignment="TOP_CENTER" spacing="20" maxWidth="440" prefHeight="600"
+        <VBox alignment="TOP_CENTER" spacing="20" maxWidth="440" prefHeight="400"
               style="-fx-background-color: rgba(255, 255, 255, 0.99); -fx-background-radius: 20px; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 40, 0, 0, 15);">
             <padding>
                 <Insets top="30" right="35" bottom="30" left="35"/>
