@@ -22,11 +22,15 @@
     <HBox spacing="20">
         <VBox spacing="2">
             <Label text="DÉBUT" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
-            <Label fx:id="startDateLabel" text="01/01/2024" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
+            <Label fx:id="startDateLabel" text="01/01/2024" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: -fx-text-primary;" />
         </VBox>
         <VBox spacing="2">
-            <Label text="ÉCHÉANCE" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
-            <Label fx:id="endDateLabel" text="31/12/2024" style="-fx-font-size: 13px; -fx-font-weight: 600;" />
+            <Label text="FIN" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
+            <Label fx:id="endDateLabel" text="31/12/2024" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: -fx-text-primary;" />
+        </VBox>
+        <VBox spacing="2">
+            <Label text="DURÉE" style="-fx-font-size: 10px; -fx-font-weight: 700; -fx-text-fill: -fx-text-secondary;" />
+            <Label fx:id="durationLabel" text="365 jours" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: -fx-text-primary;" />
         </VBox>
     </HBox>
 

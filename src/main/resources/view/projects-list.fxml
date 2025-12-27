@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestionprojet.controller.DashboardController"
+      stylesheets="@../css/style.css"
+      spacing="30">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="8">
+        <Label text="Gestion des Projets" styleClass="h1" />
+        <Label text="Liste complète de vos projets." styleClass="small-text" />
+    </VBox>
+
+    <ScrollPane style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" fitToWidth="true" VBox.vgrow="ALWAYS">
+        <VBox spacing="30">
+            <!-- Projects Section -->
+            <VBox spacing="20" styleClass="card">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="4">
+                        <Label text="Vos Projets" styleClass="h2" />
+                        <Label text="Gérez et suivez l'avancement de vos projets." styleClass="small-text" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox spacing="10">
+                        <Button text="Nouveau Projet" onAction="#AddProject" styleClass="button-primary" />
+                    </HBox>
+                </HBox>
+
+                <GridPane fx:id="projectsGrid" hgap="20" vgap="20">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+                    
+                    <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="15" style="-fx-padding: 60 0;" GridPane.columnSpan="2">
+                        <Label text="Aucun projet trouvé" styleClass="h2" style="-fx-text-fill: -fx-text-secondary;" />
+                        <Label text="Commencez par créer un nouveau projet." styleClass="small-text" />
+                    </VBox>
+                </GridPane>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

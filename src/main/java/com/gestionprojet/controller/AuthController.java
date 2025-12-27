@@ -16,6 +16,10 @@ public class AuthController {
     @FXML
     private PasswordField loginPasswordField;
     @FXML
+    private TextField loginPasswordFieldVisible;
+    @FXML
+    private CheckBox showPasswordCheckBox;
+    @FXML
     private Label loginErrorLabel;
 
     @FXML
@@ -53,16 +57,25 @@ public class AuthController {
         }
 
         String usernameOrEmail = loginUsernameField.getText();
-        String password = loginPasswordField.getText();
+        String password = showPasswordCheckBox.isSelected() ? loginPasswordFieldVisible.getText()
+                : loginPasswordField.getText();
+
+        if (usernameOrEmail == null || usernameOrEmail.trim().isEmpty()) {
+            showLoginError("Veuillez saisir votre nom d'utilisateur ou email");
+            return;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            showLoginError("Veuillez saisir votre mot de passe");
+            return;
+        }
 
         try {
-
             authService.login(usernameOrEmail, password);
             showDashboard();
         } catch (IllegalArgumentException e) {
             showLoginError(e.getMessage());
         } catch (Exception e) {
-            showLoginError("Erreur lors de la connexion: " + e.getMessage());
+            showLoginError("Nom d'utilisateur ou mot de passe incorrect");
         }
     }
 
@@ -79,8 +92,28 @@ public class AuthController {
         String confirmPassword = registerConfirmPasswordField.getText();
         com.gestionprojet.model.enums.Role role = registerRoleComboBox.getValue();
 
-        try {
+        if (username == null || username.trim().isEmpty()) {
+            showRegisterError("Le nom d'utilisateur est requis");
+            return;
+        }
+        if (email == null || email.trim().isEmpty()) {
+            showRegisterError("L'adresse email est requise");
+            return;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            showRegisterError("Le mot de passe est requis");
+            return;
+        }
+        if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            showRegisterError("Veuillez confirmer votre mot de passe");
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            showRegisterError("Les mots de passe ne correspondent pas");
+            return;
+        }
 
+        try {
             authService.register(username, email, password, confirmPassword, role);
             showSuccess("Inscription réussie! Vous pouvez maintenant vous connecter.");
             showLoginView();
@@ -101,7 +134,8 @@ public class AuthController {
             controller.setAuthService(authService);
 
             Stage stage = (Stage) loginUsernameField.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.setTitle("ProjectHub - Inscription");
         } catch (IOException e) {
             showLoginError("Erreur lors du chargement de la vue d'inscription");
         }
@@ -117,9 +151,23 @@ public class AuthController {
             controller.setAuthService(authService);
 
             Stage stage = (Stage) registerUsernameField.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.setTitle("ProjectHub - Connexion");
         } catch (IOException e) {
             showRegisterError("Erreur lors du chargement de la vue de connexion");
+        }
+    }
+
+    @FXML
+    private void togglePasswordVisibility() {
+        if (showPasswordCheckBox.isSelected()) {
+            loginPasswordFieldVisible.setText(loginPasswordField.getText());
+            loginPasswordFieldVisible.setVisible(true);
+            loginPasswordField.setVisible(false);
+        } else {
+            loginPasswordField.setText(loginPasswordFieldVisible.getText());
+            loginPasswordField.setVisible(true);
+            loginPasswordFieldVisible.setVisible(false);
         }
     }
 
@@ -145,6 +193,7 @@ public class AuthController {
         if (loginErrorLabel != null) {
             loginErrorLabel.setText(message);
             loginErrorLabel.setVisible(true);
+            loginErrorLabel.setManaged(true);
         }
     }
 
@@ -152,12 +201,14 @@ public class AuthController {
         if (registerErrorLabel != null) {
             registerErrorLabel.setText(message);
             registerErrorLabel.setVisible(true);
+            registerErrorLabel.setManaged(true);
         }
     }
 
     public void handleForgotPassword() {
         loginErrorLabel.setText("Fonctionnalité de réinitialisation de mot de passe à implémenter");
         loginErrorLabel.setVisible(true);
+        loginErrorLabel.setManaged(true);
     }
 
     private void showSuccess(String message) {

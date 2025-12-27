@@ -155,9 +155,17 @@ public class MainController {
             User user = authService.getCurrentUser();
             lblUserName.setText(user.getUsername());
             lblUserRole.setText(user.getRole().toString());
-            loadProjects();
+            refreshProjects();
         }
         showDashboard();
+    }
+
+    public void refreshProjects() {
+        loadProjects();
+    }
+
+    public void refreshSprints() {
+        loadSprintsForProject(comboActiveProject.getValue());
     }
 
     private void setActiveButton(Button activeButton) {
@@ -190,7 +198,7 @@ public class MainController {
             if (controller instanceof DashboardController) {
                 DashboardController dc = (DashboardController) controller;
                 dc.setAuthService(authService);
-                // Dashboard also shows project list, might need to sync
+                dc.setMainController(this);
             } else if (controller instanceof SprintsViewController) {
                 SprintsViewController svc = (SprintsViewController) controller;
                 svc.setMainController(this);
@@ -203,6 +211,10 @@ public class MainController {
                 bc.setProject(comboActiveProject.getValue());
                 if (authService != null)
                     bc.setCurrentUser(authService.getCurrentUser());
+            } else if (controller instanceof ProfileController) {
+                ProfileController pc = (ProfileController) controller;
+                pc.setAuthService(authService);
+                pc.setMainController(this);
             }
 
             contentArea.getChildren().setAll(view);
@@ -220,7 +232,7 @@ public class MainController {
 
     @FXML
     public void showProjects() {
-        loadView("/view/dashboard.fxml", btnProjects);
+        loadView("/view/projects-list.fxml", btnProjects);
     }
 
     @FXML
@@ -294,12 +306,11 @@ public class MainController {
 
     @FXML
     private void showSettings() {
-        System.out.println("Show Settings");
-        setActiveButton(btnSettings);
+        loadView("/view/profile.fxml", btnSettings);
     }
 
     @FXML
-    private void handleLogout() {
+    public void handleLogout() {
         if (authService != null) {
             authService.logout();
         }

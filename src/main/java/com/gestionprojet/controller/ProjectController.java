@@ -36,31 +36,33 @@ public class ProjectController {
         if (project != null) {
             ProjectName.setText(project.getName());
             ProjectDesc.setText(project.getDescription());
+            ProjectStartDate.setValue(project.getStartDate());
+            ProjectEndDate.setValue(project.getEndDate());
         }
     }
 
     public void setDashboardController(DashboardController controller) {
         this.dashboardController = controller;
     }
+
     @FXML
-    private void handleSave(){
+    private void handleSave() {
         String name = ProjectName.getText().trim();
         String desc = ProjectDesc.getText().trim();
 
-        if(name.isEmpty()){
+        if (name.isEmpty()) {
             showError("Veuillez remplir le champ de Nom ");
             return;
         }
-        try{
-            if( project == null ){
-                project = new Project(name,desc, SessionManager.getInstance().getCurrentUser());
-                if(ProjectStartDate.getValue() != null || ProjectEndDate.getValue() != null){
+        try {
+            if (project == null) {
+                project = new Project(name, desc, SessionManager.getInstance().getCurrentUser());
+                if (ProjectStartDate.getValue() != null || ProjectEndDate.getValue() != null) {
                     project.setStartDate(ProjectStartDate.getValue());
                     project.setEndDate(ProjectEndDate.getValue());
                 }
                 projectDAO.create(project);
-            }
-            else{
+            } else {
                 project.setName(name);
                 project.setDescription(desc);
                 project.setStartDate(ProjectStartDate.getValue());
@@ -70,22 +72,27 @@ public class ProjectController {
             }
             refreshDashboardProjects();
             closeForm();
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             showError("Erreur dans l'enregistrement de projet");
         }
     }
+
     @FXML
-    private void handleCancel(){ closeForm();}
-    private void showError(String message){
+    private void handleCancel() {
+        closeForm();
+    }
+
+    private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
     }
-    private void closeForm(){
+
+    private void closeForm() {
         Stage stage = (Stage) ProjectName.getScene().getWindow();
         stage.close();
     }
+
     private void resetForm() {
         ProjectName.clear();
         ProjectDesc.clear();

@@ -43,8 +43,13 @@ public class DashboardController {
     private VBox emptyStateContainer;
 
     private AuthService authService;
+    private MainController mainController;
     private List<Project> projects;
     private ProjectDAO projectDAO = new ProjectDAO();
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     public void setAuthService(AuthService authService) {
         this.authService = authService;
@@ -174,6 +179,9 @@ public class DashboardController {
     public void refreshProjects(List<Project> projectList) {
         this.projects = projectList;
         loadProjects();
+        if (mainController != null) {
+            mainController.refreshProjects();
+        }
     }
 
     @FXML
@@ -236,6 +244,9 @@ public class DashboardController {
                 projects.remove(project);
                 projectDAO.delete(project);
                 loadProjects();
+                if (mainController != null) {
+                    mainController.refreshProjects();
+                }
                 showSuccess("Projet supprimé avec succès");
             } catch (Exception e) {
                 System.err.println("Erreur suppression: " + e.getMessage());
@@ -256,10 +267,8 @@ public class DashboardController {
             }
 
             Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root, 1200, 800));
             stage.setTitle("Project Manager - Connexion");
-            stage.setWidth(900);
-            stage.setHeight(650);
             stage.centerOnScreen();
         } catch (IOException e) {
             System.err.println("Erreur retour login: " + e.getMessage());

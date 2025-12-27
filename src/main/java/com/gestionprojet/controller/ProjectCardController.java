@@ -17,6 +17,10 @@ public class ProjectCardController {
 
     @FXML
     private Label endDateLabel;
+
+    @FXML
+    private Label durationLabel;
+
     @FXML
     private Label statusLabel;
 
@@ -33,6 +37,13 @@ public class ProjectCardController {
         descriptionLabel.setText(project.getDescription());
         startDateLabel.setText(formatDate(project.getStartDate()));
         endDateLabel.setText(formatDate(project.getEndDate()));
+
+        if (project.getStartDate() != null && project.getEndDate() != null) {
+            long days = java.time.temporal.ChronoUnit.DAYS.between(project.getStartDate(), project.getEndDate()) + 1;
+            durationLabel.setText(days + " jour(s)");
+        } else {
+            durationLabel.setText("N/A");
+        }
 
         updateStatus(project);
     }

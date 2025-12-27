@@ -29,7 +29,7 @@ public class App extends Application {
 
         // DAO + Service
         UserDAO userDao = new UserDAO();
-        ProjectDAO  projectDao = new ProjectDAO();
+        ProjectDAO projectDao = new ProjectDAO();
         AuthService authService = new AuthService(userDao, projectDao);
 
         // Charger la vue Login.fxml
@@ -41,11 +41,9 @@ public class App extends Application {
         controller.setAuthService(authService);
 
         // Paramètres fenêtre
-        Scene scene = new Scene(root);
-        primaryStage.setMinWidth(900);
-        primaryStage.setMinHeight(650);
-        primaryStage.setWidth(900);
-        primaryStage.setHeight(650);
+        Scene scene = new Scene(root, 1200, 800);
+        primaryStage.setMinWidth(1100);
+        primaryStage.setMinHeight(750);
 
         primaryStage.setTitle("Project Manager - Connexion");
         primaryStage.setScene(scene);

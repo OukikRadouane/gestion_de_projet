@@ -8,9 +8,9 @@
 <StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.gestionprojet.controller.AuthController"
            stylesheets="@../css/style.css"
-           style="-fx-background-color: #F9FAFB;">
+           styleClass="root-pane" alignment="CENTER">
 
-    <VBox alignment="CENTER" maxWidth="500" spacing="25" styleClass="card">
+    <VBox alignment="CENTER" maxWidth="500" spacing="25" styleClass="card" StackPane.alignment="CENTER">
         <padding>
             <Insets top="30" right="40" bottom="30" left="40"/>
         </padding>

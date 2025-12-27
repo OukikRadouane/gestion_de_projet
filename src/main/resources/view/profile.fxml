@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestionprojet.controller.ProfileController"
+      stylesheets="@../css/style.css"
+      spacing="30">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+
+    <VBox spacing="8">
+        <Label text="Mon Profil" styleClass="h1" />
+        <Label text="Gérez vos informations personnelles et votre compte." styleClass="small-text" />
+    </VBox>
+
+    <VBox styleClass="card" spacing="25">
+        <padding>
+            <Insets top="30" right="30" bottom="30" left="30"/>
+        </padding>
+
+        <VBox spacing="20">
+            <VBox spacing="8">
+                <Label text="Nom d'utilisateur" styleClass="label-strong" />
+                <TextField fx:id="usernameField" styleClass="input" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Email" styleClass="label-strong" />
+                <TextField fx:id="emailField" styleClass="input" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Rôle" styleClass="label-strong" />
+                <TextField fx:id="roleField" styleClass="input" editable="false" disable="true" />
+            </VBox>
+        </VBox>
+
+        <Label fx:id="messageLabel" wrapText="true" visible="false" managed="false" />
+
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Button text="Enregistrer les modifications" onAction="#handleSave" styleClass="button-primary" />
+        </HBox>
+
+        <Separator />
+
+        <VBox spacing="15">
+            <Label text="Zone de danger" style="-fx-text-fill: #EF4444; -fx-font-weight: 700; -fx-font-size: 14px;" />
+            <Label text="La suppression de votre compte est définitive et effacera toutes vos données." styleClass="small-text" />
+            <Button text="Supprimer mon compte" onAction="#handleDeleteAccount" 
+                    style="-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-border-color: #EF4444; -fx-border-radius: 8; -fx-padding: 10 20; -fx-cursor: hand; -fx-font-weight: 600;" />
+        </VBox>
+    </VBox>
+</VBox>

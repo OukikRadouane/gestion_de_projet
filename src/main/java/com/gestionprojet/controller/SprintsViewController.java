@@ -105,6 +105,9 @@ public class SprintsViewController {
 
     public void refreshSprints() {
         loadSprints();
+        if (mainController != null) {
+            mainController.refreshSprints();
+        }
     }
 
     public void navigateToKanban(Sprint sprint) {
@@ -157,6 +160,9 @@ public class SprintsViewController {
             try {
                 sprintDAO.delete(sprint);
                 loadSprints();
+                if (mainController != null) {
+                    mainController.refreshSprints();
+                }
                 showSuccess("Sprint supprimé avec succès");
             } catch (Exception e) {
                 System.err.println("Erreur suppression: " + e.getMessage());

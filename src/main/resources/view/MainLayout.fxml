@@ -12,7 +12,7 @@
             prefWidth="1200" prefHeight="800">
 
     <left>
-        <VBox styleClass="sidebar" prefWidth="260" spacing="10">
+        <VBox styleClass="sidebar" prefWidth="260" spacing="10" VBox.vgrow="ALWAYS">
             <padding>
                 <Insets top="30" right="15" bottom="30" left="15"/>
             </padding>
@@ -55,7 +55,7 @@
                 
                 <Region VBox.vgrow="ALWAYS" />
                 
-                <Button fx:id="btnSettings" text="Paramètres" onAction="#showSettings"
+                <Button fx:id="btnSettings" text="Profile" onAction="#showSettings"
                         styleClass="sidebar-item" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
             </VBox>
 
