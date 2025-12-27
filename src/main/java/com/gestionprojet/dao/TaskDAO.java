@@ -90,7 +90,7 @@ public class TaskDAO {
         try {
             List<Task> result = session
                     .createQuery(
-                            "SELECT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project WHERE t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
+                            "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
                             Task.class)
                     .setParameter("sprintId", sprint.getId()).getResultList();
             System.out.println(
@@ -107,9 +107,9 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List<Task> result = session.createQuery(
-                    "SELECT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint WHERE t.project.id = :projectId ORDER BY t.priority DESC, t.deadline",
+                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.project = :project ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("projectId", project.getId())
+                    .setParameter("project", project)
                     .getResultList();
             System.out.println(
                     "TaskDAO: getByProject(ID=" + project.getId() + ") -> " + result.size() + " tâches trouvées");
@@ -123,7 +123,7 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             return session.createQuery(
-                    "Select t From Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project Where t.sprint.id = :sprintId and t.status= :status Order By t.priority DESC, t.deadline",
+                    "Select DISTINCT t From Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs Where t.sprint.id = :sprintId and t.status= :status Order By t.priority DESC, t.deadline",
                     Task.class).setParameter("sprintId", sprint.getId()).setParameter("status", status).getResultList();
         } finally {
             session.close();
@@ -135,9 +135,9 @@ public class TaskDAO {
             return new ArrayList<>();
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                    "SELECT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project WHERE t.project.id = :projectId AND t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
+                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.project LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.project = :project AND t.sprint.id = :sprintId ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("projectId", project.getId())
+                    .setParameter("project", project)
                     .setParameter("sprintId", sprint.getId())
                     .getResultList();
         }
@@ -148,9 +148,9 @@ public class TaskDAO {
             return new ArrayList<>();
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                    "SELECT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint WHERE t.project.id = :projectId AND t.sprint IS NULL ORDER BY t.priority DESC, t.deadline",
+                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.project = :project AND t.sprint IS NULL ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("projectId", project.getId())
+                    .setParameter("project", project)
                     .getResultList();
         }
     }
