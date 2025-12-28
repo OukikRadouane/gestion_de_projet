@@ -26,7 +26,7 @@
                     <Label text="Priorisez vos tâches avant de les déplacer vers un sprint." styleClass="small-text" />
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="+ Ajouter au Backlog" styleClass="button-primary" onAction="#handleAddTask" />
+                <Button fx:id="btnAddTask" text="+ Ajouter au Backlog" styleClass="button-primary" onAction="#handleAddTask" />
             </HBox>
 
             <TableView fx:id="backlogTable" style="-fx-background-color: transparent; -fx-border-color: -fx-border; -fx-border-radius: 8;">

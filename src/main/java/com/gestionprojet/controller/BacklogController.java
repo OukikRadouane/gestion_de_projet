@@ -34,6 +34,8 @@ public class BacklogController {
     private TableColumn<Task, String> colAssignee;
     @FXML
     private TableColumn<Task, Void> colActions;
+    @FXML
+    private Button btnAddTask;
 
     private final TaskDAO taskDAO = new TaskDAO();
     private final SprintDAO sprintDAO = new SprintDAO();
@@ -53,6 +55,7 @@ public class BacklogController {
                         : "Non assigné"));
 
         setupActionsColumn();
+        applyRBAC();
     }
 
     private void setupActionsColumn() {
@@ -119,6 +122,17 @@ public class BacklogController {
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
+        applyRBAC();
+    }
+
+    private void applyRBAC() {
+        if (currentUser == null || btnAddTask == null)
+            return;
+        com.gestionprojet.model.enums.Role role = currentUser.getRole();
+        boolean canAdd = (role == com.gestionprojet.model.enums.Role.ADMIN
+                || role == com.gestionprojet.model.enums.Role.PRODUCT_OWNER);
+        btnAddTask.setVisible(canAdd);
+        btnAddTask.setManaged(canAdd);
     }
 
     private void loadBacklog() {

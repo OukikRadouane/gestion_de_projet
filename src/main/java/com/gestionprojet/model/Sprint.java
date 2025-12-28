@@ -6,11 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Sprint {
     @Id
@@ -39,6 +35,9 @@ public class Sprint {
 
     @OneToMany(mappedBy = "sprint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
+
+    public Sprint() {
+    }
 
     // Constructeur pour faciliter la création
     public Sprint(String name, LocalDate startDate, LocalDate endDate, Project project) {

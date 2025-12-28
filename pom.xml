@@ -98,7 +98,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.gestionprojet.HelloApplication</mainClass>
+                            <mainClass>com.gestionprojet.App</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
