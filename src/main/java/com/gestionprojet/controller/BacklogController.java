@@ -6,6 +6,7 @@ import com.gestionprojet.model.Project;
 import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
+import com.gestionprojet.model.enums.Role;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -128,9 +129,8 @@ public class BacklogController {
     private void applyRBAC() {
         if (currentUser == null || btnAddTask == null)
             return;
-        com.gestionprojet.model.enums.Role role = currentUser.getRole();
-        boolean canAdd = (role == com.gestionprojet.model.enums.Role.ADMIN
-                || role == com.gestionprojet.model.enums.Role.PRODUCT_OWNER);
+        Role role = currentUser.getRole();
+        boolean canAdd = (role == Role.ADMIN || role == Role.PRODUCT_OWNER);
         btnAddTask.setVisible(canAdd);
         btnAddTask.setManaged(canAdd);
     }

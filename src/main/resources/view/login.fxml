@@ -41,9 +41,6 @@
                     <Label text="Mot de passe"
                            styleClass="label-strong"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Hyperlink text="Oublié ?"
-                           onAction="#handleForgotPassword"
-                           styleClass="link"/>
                 </HBox>
                 <StackPane>
                     <PasswordField fx:id="loginPasswordField"

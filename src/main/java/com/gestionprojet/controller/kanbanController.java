@@ -58,6 +58,7 @@ public class kanbanController {
         this.project = project;
         this.sprint = sprint;
         reloadTasks();
+        refreshButtons();
     }
 
     public kanbanController() {
@@ -66,6 +67,7 @@ public class kanbanController {
 
     public void setUser(User user) {
         this.user = user;
+        refreshButtons();
     }
 
     private void loadTasksForSprint() {
