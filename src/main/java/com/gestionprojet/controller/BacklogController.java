@@ -124,12 +124,7 @@ public class BacklogController {
     private void loadBacklog() {
         if (project == null)
             return;
-        List<Task> allProjectTasks = taskDAO.getByProject(project);
-        // Filtre : Tâches qui n'appartiennent à aucun sprint (Backlog Produit)
-        List<Task> backlogTasks = allProjectTasks.stream()
-                .filter(t -> t.getSprint() == null)
-                .collect(Collectors.toList());
-
+        List<Task> backlogTasks = taskDAO.getBacklogByProject(project);
         backlogTable.setItems(FXCollections.observableArrayList(backlogTasks));
     }
 

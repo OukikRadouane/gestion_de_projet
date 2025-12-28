@@ -143,6 +143,13 @@ public class TaskDialogController {
         try {
             if (task == null) {
                 task = new Task(name, description, status, priority, deadline, assignee, sprint, project);
+                if (sprint != null && sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED
+                        && status != TaskStatus.DONE) {
+                    System.out.println(
+                            "⚠️ Création d'une tâche non terminée dans un sprint clos. Redirection vers le backlog.");
+                    task.setSprint(null);
+                    task.setStatus(TaskStatus.BACKLOG);
+                }
                 task.addLog("Tâche créée", currentUser);
                 taskDAO.save(task);
                 System.out.println("✅ tache inséré avec succès !");
@@ -153,7 +160,15 @@ public class TaskDialogController {
                 task.setPriority(priority);
                 task.setDeadline(deadline);
                 task.setAssignee(assignee);
-                task.setSprint(sprint);
+                if (sprint != null && sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED
+                        && status != TaskStatus.DONE) {
+                    System.out.println(
+                            "⚠️ Tentative d'assignation d'une tâche non terminée à un sprint clos. Redirection vers le backlog.");
+                    task.setSprint(null);
+                    task.setStatus(TaskStatus.BACKLOG);
+                } else {
+                    task.setSprint(sprint);
+                }
                 task.addLog("Tâche modifiée", currentUser);
                 taskDAO.update(task);
                 System.out.println("✅ tache modifié avec succès !");

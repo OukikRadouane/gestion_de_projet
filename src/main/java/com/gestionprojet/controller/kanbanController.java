@@ -33,7 +33,6 @@ import java.util.List;
 public class kanbanController {
 
     private VBox backlogColumn;
-    private VBox reportedColumn;
     private VBox todoColumn;
     private VBox inProgressColumn;
     private VBox doneColumn;
@@ -42,7 +41,6 @@ public class kanbanController {
     private User user;
     private Project project;
     private VBox backlogColumnContainer;
-    private VBox reportedColumnContainer;
     private Label backlogTitleLabel;
     private List<Task> tasks;
     private Button btnStartSprint;
@@ -66,58 +64,18 @@ public class kanbanController {
     }
 
     private void loadTasksForSprint() {
-        if (sprint != null && project != null) {
-            System.out.println("Kanban: Chargement des tâches pour Sprint ID=" + sprint.getId() + " dans le Projet ID="
-                    + project.getId());
+        if (project != null) {
+            System.out.println("Kanban: Chargement des tâches pour Projet ID=" + project.getId() +
+                    (sprint != null ? " et Sprint ID=" + sprint.getId() : " (Vue Globale)"));
 
-            // 1. Récupérer toutes les tâches liées au sprint (même si certaines tâches
-            // n'ont pas de référence project remplie avant la refonte)
-            List<Task> sprintTasks = taskDAO.getBySprint(sprint);
-
-            // Filtrer : conserver les tâches qui appartiennent au projet sélectionné
-            // ou celles dont le champ project est null (anciennes tâches migrées)
-            List<Task> filteredSprintTasks = new ArrayList<>();
-            for (Task t : sprintTasks) {
-                boolean keep = false;
-                try {
-                    if (t.getProject() == null) {
-                        keep = true;
-                    } else {
-                        Long pid = null;
-                        try {
-                            pid = t.getProject().getId();
-                        } catch (Exception ex) {
-                            // Si l'accès au projet échoue (lazy init / absence), considérer comme
-                            // non-appartient
-                            pid = null;
-                        }
-                        if (pid != null && pid.equals(project.getId())) {
-                            keep = true;
-                        }
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                if (keep) {
-                    filteredSprintTasks.add(t);
-                }
-            }
-
-            // 2. Tâches du backlog du projet (sans sprint)
-            List<Task> backlogTasks = taskDAO.getBacklogByProject(project);
-
-            // Fusionner les listes
-            this.tasks = new ArrayList<>();
-            this.tasks.addAll(filteredSprintTasks);
-            this.tasks.addAll(backlogTasks);
-
-            System.out.println("Kanban: Mode Sprint - SprintTasks=" + filteredSprintTasks.size() +
-                    ", BacklogTasks=" + backlogTasks.size() + ", Total=" + tasks.size());
-        } else if (project != null) {
-            System.out.println("Kanban: Pas de sprint sélectionné, chargement de toutes les tâches du Projet ID="
-                    + project.getId());
+            // On charge TOUTES les tâches du projet.
+            // Le filtrage par sprint se fera lors de la distribution dans les colonnes pour
+            // que
+            // le backlog du projet reste toujours visible dans la colonne Backlog du
+            // Kanban.
             this.tasks = taskDAO.getByProject(project);
-            System.out.println("Kanban: Total tâches projet=" + tasks.size());
+
+            System.out.println("Kanban: Total tâches chargées=" + tasks.size());
         } else {
             this.tasks = new ArrayList<>();
         }
@@ -130,18 +88,11 @@ public class kanbanController {
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
         System.out.println("Sprint défini dans kanbanController: " + (sprint != null ? sprint.getName() : "null"));
-        reloadTasks();
+        loadTasksForSprint();
     }
 
     private void reloadTasks() {
-        if (sprint != null) {
-            loadTasksForSprint();
-        } else if (project != null) {
-            loadTasksByProject();
-        } else {
-            tasks = new ArrayList<>();
-            refreshColumns();
-        }
+        loadTasksForSprint();
     }
 
     public Parent createView() {
@@ -154,7 +105,6 @@ public class kanbanController {
         root.setCenter(createKanbanColumns());
 
         setupDropTarget(backlogColumn, TaskStatus.BACKLOG);
-        setupDropTarget(reportedColumn, TaskStatus.BACKLOG); // Could be a special status, but Backlog is fine
         setupDropTarget(todoColumn, TaskStatus.TO_DO);
         setupDropTarget(inProgressColumn, TaskStatus.DOING);
         setupDropTarget(doneColumn, TaskStatus.DONE);
@@ -231,8 +181,7 @@ public class kanbanController {
             return;
 
         try {
-            // Logique de clôture du sprint
-            // Récupérer toutes les tâches du sprint
+            // Logique de clôture du sprint (Directe, sans service)
             List<Task> sprintTasks = taskDAO.getBySprint(sprint);
 
             for (Task t : sprintTasks) {
@@ -247,7 +196,7 @@ public class kanbanController {
             sprint.setStatus(com.gestionprojet.model.enums.SprintStatus.COMPLETED);
             sprintDAO.update(sprint);
 
-            System.out.println("✅ Sprint terminé et tâches reportées.");
+            System.out.println("✅ Sprint terminé et tâches reportées au Backlog.");
             refreshButtons();
             reloadTasks();
         } catch (Exception e) {
@@ -266,10 +215,6 @@ public class kanbanController {
         backlogColumn = createColumn();
         addColumnToContainer(backlogColumnContainer, backlogColumn);
 
-        reportedColumnContainer = createColumnContainer("À REPORTER", "#F59E0B");
-        reportedColumn = createColumn();
-        addColumnToContainer(reportedColumnContainer, reportedColumn);
-
         VBox todoColumnContainer = createColumnContainer("À FAIRE", "#6B7280");
         todoColumn = createColumn();
         addColumnToContainer(todoColumnContainer, todoColumn);
@@ -282,11 +227,8 @@ public class kanbanController {
         doneColumn = createColumn();
         addColumnToContainer(doneColumnContainer, doneColumn);
 
-        columnsContainer.getChildren().addAll(backlogColumnContainer, reportedColumnContainer, todoColumnContainer,
+        columnsContainer.getChildren().addAll(backlogColumnContainer, todoColumnContainer,
                 inProgressColumnContainer, doneColumnContainer);
-
-        // Visibility of reported column depends on context or presence of tasks
-        reportedColumnContainer.managedProperty().bind(reportedColumnContainer.visibleProperty());
 
         // Wrap in ScrollPane for horizontal scrolling if window is too small
         ScrollPane boardScroll = new ScrollPane(columnsContainer);
@@ -375,7 +317,6 @@ public class kanbanController {
 
         // Vider les colonnes
         backlogColumn.getChildren().clear();
-        reportedColumn.getChildren().clear();
         todoColumn.getChildren().clear();
         inProgressColumn.getChildren().clear();
         doneColumn.getChildren().clear();
@@ -388,10 +329,7 @@ public class kanbanController {
         System.out.println("Kanban: Distribution de " + tasks.size() + " tâches dans les colonnes.");
 
         if (backlogTitleLabel != null) {
-            backlogTitleLabel.setText(sprint != null ? "BACKLOG DU SPRINT" : "BACKLOG PRODUIT");
-        }
-        if (reportedColumnContainer != null) {
-            reportedColumnContainer.setVisible(sprint == null);
+            backlogTitleLabel.setText("BACKLOG PRODUIT");
         }
 
         // Ajouter les tâches aux colonnes appropriées
@@ -400,40 +338,26 @@ public class kanbanController {
                 VBox taskCard = createTaskCard(task);
                 TaskStatus status = task.getStatus() != null ? task.getStatus() : TaskStatus.TO_DO;
 
-                // Si un sprint est actif, on applique un filtrage strict pour les colonnes
-                // Sprint
-                if (this.sprint != null) {
-                    // Si la tâche appartient au sprint actif courant
-                    if (task.getSprint() != null && task.getSprint().getId().equals(this.sprint.getId())) {
+                // Distribution des tâches
+                if (status == TaskStatus.BACKLOG || (this.sprint != null && task.getSprint() == null)) {
+                    // Les tâches au statut BACKLOG vont toujours dans la colonne Backlog.
+                    // AUSSI, dans une vue sprint, les tâches qui n'ont pas de sprint (Backlog
+                    // Produit)
+                    // doivent apparaître dans cette colonne pour être visibles et planifiables.
+                    backlogColumn.getChildren().add(taskCard);
+                } else {
+                    // Pour les colonnes de travail (TODO, DOING, DONE) :
+                    // 1. Si aucun sprint n'est sélectionné (Vue Globale), on affiche tout ce qui
+                    // n'est pas au statut BACKLOG.
+                    // 2. Si un sprint est sélectionné, on n'affiche que les tâches de CE sprint.
+                    if (this.sprint == null
+                            || (task.getSprint() != null && task.getSprint().getId().equals(this.sprint.getId()))) {
                         switch (status) {
-                            case BACKLOG -> backlogColumn.getChildren().add(taskCard);
                             case TO_DO -> todoColumn.getChildren().add(taskCard);
                             case DOING -> inProgressColumn.getChildren().add(taskCard);
                             case DONE -> doneColumn.getChildren().add(taskCard);
-                            default -> todoColumn.getChildren().add(taskCard);
-                        }
-                    }
-                    // Si la tâche n'a pas de sprint, elle va d'office dans le backlog
-                    else if (task.getSprint() == null) {
-                        backlogColumn.getChildren().add(taskCard);
-                    }
-                    // Les tâches appartenant à d'autres sprints ne sont pas affichées (déjà
-                    // filtrées à la charge)
-                }
-                // Mode Global Projet (pas de sprint actif sélectionné)
-                else {
-                    boolean isReported = task.getLogs() != null && task.getLogs().stream()
-                            .anyMatch(log -> log.getMessage().contains("reportée au Backlog"));
-
-                    if (isReported && task.getSprint() == null && status == TaskStatus.BACKLOG) {
-                        reportedColumn.getChildren().add(taskCard);
-                    } else {
-                        switch (status) {
-                            case BACKLOG -> backlogColumn.getChildren().add(taskCard);
-                            case TO_DO -> todoColumn.getChildren().add(taskCard);
-                            case DOING-> inProgressColumn.getChildren().add(taskCard);
-                            case DONE -> doneColumn.getChildren().add(taskCard);
-                            default -> backlogColumn.getChildren().add(taskCard);
+                            default -> {
+                            }
                         }
                     }
                 }

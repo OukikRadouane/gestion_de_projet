@@ -107,9 +107,12 @@ public class TaskDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List<Task> result = session.createQuery(
-                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.project = :project ORDER BY t.priority DESC, t.deadline",
+                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project p LEFT JOIN FETCH t.sprint s LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs "
+                            +
+                            "WHERE p.id = :projectId OR (p.id IS NULL AND s.project.id = :projectId) " +
+                            "ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("project", project)
+                    .setParameter("projectId", project.getId())
                     .getResultList();
             System.out.println(
                     "TaskDAO: getByProject(ID=" + project.getId() + ") -> " + result.size() + " tâches trouvées");
@@ -148,9 +151,13 @@ public class TaskDAO {
             return new ArrayList<>();
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project LEFT JOIN FETCH t.sprint LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs WHERE t.project = :project AND t.sprint IS NULL ORDER BY t.priority DESC, t.deadline",
+                    "SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.project p LEFT JOIN FETCH t.sprint s LEFT JOIN FETCH t.assignee LEFT JOIN FETCH t.logs "
+                            +
+                            "WHERE (p.id = :projectId OR (p.id IS NULL AND s.project.id = :projectId)) " +
+                            "AND s.id IS NULL " +
+                            "ORDER BY t.priority DESC, t.deadline",
                     Task.class)
-                    .setParameter("project", project)
+                    .setParameter("projectId", project.getId())
                     .getResultList();
         }
     }

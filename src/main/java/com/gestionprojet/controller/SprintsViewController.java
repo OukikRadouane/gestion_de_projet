@@ -131,6 +131,7 @@ public class SprintsViewController {
             controller.setSprint(sprint);
             controller.setProject(project);
             controller.setSprintsViewController(this);
+            controller.setCurrentUser(this.currentUser);
 
             Stage stage = new Stage();
             stage.setTitle(sprint == null ? "Nouveau Sprint" : "Modifier Sprint");

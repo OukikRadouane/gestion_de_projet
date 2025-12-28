@@ -32,9 +32,15 @@ public class SprintController {
     private Label titleLabel;
 
     private SprintDAO sprintDAO = new SprintDAO();
+    private final com.gestionprojet.dao.TaskDAO taskDAO = new com.gestionprojet.dao.TaskDAO();
     private Sprint sprint;
     private Project project;
     private SprintsViewController sprintsViewController;
+    private com.gestionprojet.model.User currentUser;
+
+    public void setCurrentUser(com.gestionprojet.model.User user) {
+        this.currentUser = user;
+    }
 
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
@@ -68,7 +74,7 @@ public class SprintController {
         // Initialiser le ComboBox avec les statuts
         sprintStatus.getItems().addAll(SprintStatus.values());
         sprintStatus.setValue(SprintStatus.PLANNED);
-        
+
         // Configurer le StringConverter pour afficher les labels français
         sprintStatus.setConverter(new StringConverter<SprintStatus>() {
             @Override
@@ -95,7 +101,7 @@ public class SprintController {
             long days = java.time.temporal.ChronoUnit.DAYS.between(
                     sprintStartDate.getValue(), sprintEndDate.getValue()) + 1;
             durationLabel.setText("Durée: " + days + " jour(s)");
-            
+
             // Validation Scrum: durée recommandée entre 1 et 4 semaines
             if (days < 1) {
                 durationLabel.setStyle("-fx-text-fill: #ef4444;");
@@ -159,20 +165,56 @@ public class SprintController {
                 sprint.setGoal(sprintGoal.getText().trim());
                 sprint.setStatus(sprintStatus.getValue());
                 sprintDAO.create(sprint);
+
+                // Si on crée directement un sprint complété (rare mais possible)
+                if (sprint.getStatus() == SprintStatus.COMPLETED) {
+                    completeSprint(sprint);
+                }
             } else {
                 // Modification
                 sprint.setName(name);
                 sprint.setGoal(sprintGoal.getText().trim());
                 sprint.setStartDate(startDate);
                 sprint.setEndDate(endDate);
-                sprint.setStatus(sprintStatus.getValue());
-                sprintDAO.update(sprint);
+
+                SprintStatus newStatus = sprintStatus.getValue();
+                if (newStatus == SprintStatus.COMPLETED && sprint.getStatus() != SprintStatus.COMPLETED) {
+                    // Si le statut passe à COMPLETED, exécuter la logique de clôture
+                    completeSprint(sprint);
+                } else {
+                    sprint.setStatus(newStatus);
+                    sprintDAO.update(sprint);
+                }
             }
             closeForm();
         } catch (Exception ex) {
             ex.printStackTrace();
             showError("Erreur lors de l'enregistrement du sprint");
         }
+    }
+
+    private void completeSprint(Sprint sprint) {
+        if (sprint == null)
+            return;
+
+        // 1. Récupérer toutes les tâches du sprint
+        List<com.gestionprojet.model.Tasks.Task> sprintTasks = taskDAO.getBySprint(sprint);
+
+        // 2. Traiter les tâches non terminées
+        for (com.gestionprojet.model.Tasks.Task task : sprintTasks) {
+            if (task.getStatus() != com.gestionprojet.model.Tasks.TaskStatus.DONE) {
+                task.setSprint(null);
+                task.setStatus(com.gestionprojet.model.Tasks.TaskStatus.BACKLOG);
+                task.addLog("Sprint terminé - Tâche non terminée reportée au Backlog", currentUser);
+                taskDAO.update(task);
+            }
+        }
+
+        // 3. Mettre à jour le statut du sprint
+        sprint.setStatus(SprintStatus.COMPLETED);
+        sprintDAO.update(sprint);
+
+        System.out.println("SprintController: Sprint '" + sprint.getName() + "' terminé via UI.");
     }
 
     private Long getSprintIdForValidation() {
@@ -184,8 +226,8 @@ public class SprintController {
         for (Sprint existingSprint : existingSprints) {
             if (sprint == null || !existingSprint.getId().equals(sprint.getId())) {
                 // Vérifier le chevauchement
-                if (!(endDate.isBefore(existingSprint.getStartDate()) || 
-                      startDate.isAfter(existingSprint.getEndDate()))) {
+                if (!(endDate.isBefore(existingSprint.getStartDate()) ||
+                        startDate.isAfter(existingSprint.getEndDate()))) {
                     return true;
                 }
             }
@@ -211,4 +253,3 @@ public class SprintController {
         }
     }
 }
-
