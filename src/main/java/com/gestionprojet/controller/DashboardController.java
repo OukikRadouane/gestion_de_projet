@@ -4,13 +4,16 @@ import com.gestionprojet.dao.ProjectDAO;
 import com.gestionprojet.model.Project;
 import com.gestionprojet.model.User;
 import com.gestionprojet.service.AuthService;
+import com.gestionprojet.service.SprintService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.Priority;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import com.gestionprojet.model.enums.Role;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -41,11 +44,14 @@ public class DashboardController {
     private GridPane projectsGrid;
     @FXML
     private VBox emptyStateContainer;
+    @FXML
+    private Button btnAddProject;
 
     private AuthService authService;
     private MainController mainController;
     private List<Project> projects;
     private ProjectDAO projectDAO = new ProjectDAO();
+    private SprintService sprintService = new SprintService();
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
@@ -75,6 +81,16 @@ public class DashboardController {
         if (authService != null && authService.isLoggedIn()) {
             User user = authService.getCurrentUser();
             System.out.println("Chargement info utilisateur: " + user.getUsername());
+
+            if (btnAddProject != null) {
+                Role role = user.getRole();
+                boolean canAdd = (role == Role.ADMIN || role == Role.PRODUCT_OWNER);
+                btnAddProject.setVisible(canAdd);
+                btnAddProject.setManaged(canAdd);
+            }
+
+            // Trigger auto-closure of expired sprints
+            sprintService.autoCloseExpiredSprints(user);
 
             if (welcomeLabel != null)
                 welcomeLabel.setText("Bienvenue, " + user.getUsername() + "!");

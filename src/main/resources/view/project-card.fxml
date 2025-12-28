@@ -35,8 +35,8 @@
     </HBox>
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Modifier" onAction="#handleEdit" styleClass="button-outline" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
-        <Button text="Supprimer" onAction="#handleDelete" 
+        <Button fx:id="btnEditProject" text="Modifier" onAction="#handleEdit" styleClass="button-outline" style="-fx-padding: 6 12; -fx-font-size: 12px;" />
+        <Button fx:id="btnDeleteProject" text="Supprimer" onAction="#handleDelete" 
                 style="-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: 600; -fx-font-size: 12px; -fx-cursor: hand;" />
     </HBox>
 </VBox>

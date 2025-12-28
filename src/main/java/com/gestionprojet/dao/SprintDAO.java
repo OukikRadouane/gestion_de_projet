@@ -6,6 +6,7 @@ import com.gestionprojet.utils.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class SprintDAO {
@@ -78,12 +79,22 @@ public class SprintDAO {
         try (Session session = HibernateUtil.getSession()) {
             java.time.LocalDate today = java.time.LocalDate.now();
             return session.createQuery(
-                    "SELECT s FROM Sprint s LEFT JOIN FETCH s.project WHERE s.project.id = :projectId AND s.startDate <= :today AND s.endDate >= :today",
+                    "SELECT s FROM Sprint s LEFT JOIN FETCH s.project WHERE s.project.id = :projectId AND s.startDate <= :today AND s.endDate >= :today AND s.status = 'ACTIVE'",
                     Sprint.class)
                     .setParameter("projectId", project.getId())
                     .setParameter("today", today)
                     .setMaxResults(1)
                     .uniqueResult();
+        }
+    }
+
+    public List<Sprint> getExpiredActiveSprints(LocalDate date) {
+        try (Session session = HibernateUtil.getSession()) {
+            return session.createQuery(
+                    "SELECT s FROM Sprint s WHERE (s.status = 'ACTIVE' OR s.status = 'PLANNED') AND s.endDate < :date",
+                    Sprint.class)
+                    .setParameter("date", date)
+                    .getResultList();
         }
     }
 }

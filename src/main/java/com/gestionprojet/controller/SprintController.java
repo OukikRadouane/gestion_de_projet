@@ -3,7 +3,9 @@ package com.gestionprojet.controller;
 import com.gestionprojet.dao.SprintDAO;
 import com.gestionprojet.model.Project;
 import com.gestionprojet.model.Sprint;
+import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.model.enums.SprintStatus;
+import com.gestionprojet.service.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -48,10 +50,22 @@ public class SprintController {
             if (titleLabel != null) {
                 titleLabel.setText("Modifier le sprint");
             }
+            checkLockedState();
         } else {
             if (titleLabel != null) {
                 titleLabel.setText("Créer un nouveau sprint");
             }
+        }
+    }
+
+    private void checkLockedState() {
+        if (sprint != null
+                && (sprint.getStatus() == SprintStatus.COMPLETED || sprint.getStatus() == SprintStatus.CANCELLED)) {
+            sprintName.setEditable(false);
+            sprintGoal.setEditable(false);
+            sprintStartDate.setDisable(true);
+            sprintEndDate.setDisable(true);
+            sprintStatus.setDisable(true);
         }
     }
 
@@ -68,7 +82,7 @@ public class SprintController {
         // Initialiser le ComboBox avec les statuts
         sprintStatus.getItems().addAll(SprintStatus.values());
         sprintStatus.setValue(SprintStatus.PLANNED);
-        
+
         // Configurer le StringConverter pour afficher les labels français
         sprintStatus.setConverter(new StringConverter<SprintStatus>() {
             @Override
@@ -95,7 +109,7 @@ public class SprintController {
             long days = java.time.temporal.ChronoUnit.DAYS.between(
                     sprintStartDate.getValue(), sprintEndDate.getValue()) + 1;
             durationLabel.setText("Durée: " + days + " jour(s)");
-            
+
             // Validation Scrum: durée recommandée entre 1 et 4 semaines
             if (days < 1) {
                 durationLabel.setStyle("-fx-text-fill: #ef4444;");
@@ -119,6 +133,12 @@ public class SprintController {
         // Validations
         if (name.isEmpty()) {
             showError("Veuillez remplir le nom du sprint");
+            return;
+        }
+
+        Role currentRole = SessionManager.getInstance().getCurrentUser().getRole();
+        if (currentRole != Role.ADMIN && currentRole != Role.SCRUM_MASTER) {
+            showError("Vous n'avez pas les droits pour " + (sprint == null ? "créer" : "modifier") + " un sprint.");
             return;
         }
 
@@ -184,8 +204,8 @@ public class SprintController {
         for (Sprint existingSprint : existingSprints) {
             if (sprint == null || !existingSprint.getId().equals(sprint.getId())) {
                 // Vérifier le chevauchement
-                if (!(endDate.isBefore(existingSprint.getStartDate()) || 
-                      startDate.isAfter(existingSprint.getEndDate()))) {
+                if (!(endDate.isBefore(existingSprint.getStartDate()) ||
+                        startDate.isAfter(existingSprint.getEndDate()))) {
                     return true;
                 }
             }
@@ -211,4 +231,3 @@ public class SprintController {
         }
     }
 }
-

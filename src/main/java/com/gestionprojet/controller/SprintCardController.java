@@ -1,8 +1,11 @@
 package com.gestionprojet.controller;
 
 import com.gestionprojet.model.Sprint;
+import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.model.enums.SprintStatus;
+import com.gestionprojet.service.SessionManager;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 public class SprintCardController {
@@ -19,6 +22,10 @@ public class SprintCardController {
     private Label statusLabel;
     @FXML
     private Label goalLabel;
+    @FXML
+    private Button btnEditSprint;
+    @FXML
+    private Button btnDeleteSprint;
 
     private Sprint currentSprint;
     private SprintsViewController sprintsViewController;
@@ -44,6 +51,18 @@ public class SprintCardController {
         }
 
         updateStatus(sprint);
+
+        // RBAC logic for buttons
+        Role role = SessionManager.getInstance().getCurrentUser().getRole();
+        boolean canManage = (role == Role.ADMIN || role == Role.SCRUM_MASTER);
+        if (btnEditSprint != null) {
+            btnEditSprint.setVisible(canManage);
+            btnEditSprint.setManaged(canManage);
+        }
+        if (btnDeleteSprint != null) {
+            btnDeleteSprint.setVisible(canManage);
+            btnDeleteSprint.setManaged(canManage);
+        }
     }
 
     private void updateStatus(Sprint sprint) {

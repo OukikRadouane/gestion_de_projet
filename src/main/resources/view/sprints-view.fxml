@@ -33,7 +33,7 @@
                         <Label text="Liste des sprints planifiés et en cours." styleClass="small-text" />
                     </VBox>
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button text="Nouveau Sprint" onAction="#handleAddSprint" styleClass="button-primary" />
+                    <Button fx:id="btnAddSprint" text="Nouveau Sprint" onAction="#handleAddSprint" styleClass="button-primary" />
                 </HBox>
 
                 <GridPane fx:id="sprintsGrid" hgap="20" vgap="20">

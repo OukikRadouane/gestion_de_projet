@@ -5,6 +5,7 @@ import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
+import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.dao.SprintDAO;
 import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXMLLoader;
@@ -45,10 +46,12 @@ public class kanbanController {
     private VBox reportedColumnContainer;
     private Label backlogTitleLabel;
     private List<Task> tasks;
+    private Button btnAddTask;
     private Button btnStartSprint;
     private Button btnCompleteSprint;
 
     private final TaskDAO taskDAO = new TaskDAO();
+    private final com.gestionprojet.service.SprintService sprintService = new com.gestionprojet.service.SprintService();
     private final SprintDAO sprintDAO = new SprintDAO();
 
     public void setInitialContext(Project project, Sprint sprint) {
@@ -181,6 +184,7 @@ public class kanbanController {
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
         Button btnAddTask = new Button("Ajouter une tâche");
+        this.btnAddTask = btnAddTask;
         btnAddTask.getStyleClass().add("button-primary");
         btnAddTask.setOnAction(e -> handleAddTask());
 
@@ -199,21 +203,48 @@ public class kanbanController {
         return topBar;
     }
 
+    private boolean isSprintClosed() {
+        return sprint != null && (sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED
+                || sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.CANCELLED);
+    }
+
     private void refreshButtons() {
+        if (user == null)
+            return;
+        Role role = user.getRole();
+        boolean closed = isSprintClosed();
+
+        if (btnAddTask != null) {
+            boolean canAdd = (role == Role.ADMIN || role == Role.PRODUCT_OWNER) && !closed;
+            btnAddTask.setVisible(canAdd);
+            btnAddTask.setManaged(canAdd);
+        }
+
         if (btnStartSprint != null && btnCompleteSprint != null) {
-            btnStartSprint.setVisible(
+            boolean canManageSprint = (role == Role.ADMIN || role == Role.SCRUM_MASTER) && !closed;
+
+            btnStartSprint.setVisible(canManageSprint &&
                     sprint != null && sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.PLANNED);
             btnStartSprint.setManaged(btnStartSprint.isVisible());
 
-            btnCompleteSprint.setVisible(
+            btnCompleteSprint.setVisible(canManageSprint &&
                     sprint != null && sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.ACTIVE);
             btnCompleteSprint.setManaged(btnCompleteSprint.isVisible());
         }
     }
 
     private void handleStartSprint() {
-        if (sprint == null)
+        if (sprint == null || user == null)
             return;
+        if (isSprintClosed())
+            return;
+
+        Role role = user.getRole();
+        if (role != Role.ADMIN && role != Role.SCRUM_MASTER) {
+            System.err.println("Permission refusée: Seul un Administrateur ou Scrum Master peut démarrer un sprint.");
+            return;
+        }
+
         try {
             sprint.setStatus(com.gestionprojet.model.enums.SprintStatus.ACTIVE);
             sprintDAO.update(sprint);
@@ -227,27 +258,21 @@ public class kanbanController {
     }
 
     private void handleCompleteSprint() {
-        if (sprint == null)
+        if (sprint == null || user == null)
+            return;
+        if (isSprintClosed())
             return;
 
+        Role role = user.getRole();
+        if (role != Role.ADMIN && role != Role.SCRUM_MASTER) {
+            System.err.println("Permission refusée: Seul un Administrateur ou Scrum Master peut terminer un sprint.");
+            return;
+        }
+
         try {
-            // Logique de clôture du sprint
-            // Récupérer toutes les tâches du sprint
-            List<Task> sprintTasks = taskDAO.getBySprint(sprint);
+            sprintService.closeSprint(sprint, user);
 
-            for (Task t : sprintTasks) {
-                if (t.getStatus() != TaskStatus.DONE) {
-                    t.setSprint(null);
-                    t.setStatus(TaskStatus.BACKLOG);
-                    t.addLog("Sprint terminé - Tâche non terminée reportée au Backlog", user);
-                    taskDAO.update(t);
-                }
-            }
-
-            sprint.setStatus(com.gestionprojet.model.enums.SprintStatus.COMPLETED);
-            sprintDAO.update(sprint);
-
-            System.out.println("✅ Sprint terminé et tâches reportées.");
+            System.out.println("✅ Sprint terminé et tâches reportées via Service.");
             refreshButtons();
             reloadTasks();
         } catch (Exception e) {
@@ -322,8 +347,16 @@ public class kanbanController {
     }
 
     private void handleAddTask() {
-        if (project == null) {
-            System.err.println("Aucun projet sélectionné pour ajouter une tâche");
+        if (project == null || user == null) {
+            System.err.println("Aucun projet sélectionné ou utilisateur non défini pour ajouter une tâche");
+            return;
+        }
+        if (isSprintClosed())
+            return;
+
+        Role role = user.getRole();
+        if (role != Role.ADMIN && role != Role.PRODUCT_OWNER) {
+            System.err.println("Permission refusée: Seul un Administrateur ou Product Owner peut ajouter des tâches.");
             return;
         }
 
@@ -431,7 +464,7 @@ public class kanbanController {
                         switch (status) {
                             case BACKLOG -> backlogColumn.getChildren().add(taskCard);
                             case TO_DO -> todoColumn.getChildren().add(taskCard);
-                            case DOING-> inProgressColumn.getChildren().add(taskCard);
+                            case DOING -> inProgressColumn.getChildren().add(taskCard);
                             case DONE -> doneColumn.getChildren().add(taskCard);
                             default -> backlogColumn.getChildren().add(taskCard);
                         }
@@ -542,6 +575,25 @@ public class kanbanController {
 
     private void setupDragSource(VBox card, Task task) {
         card.setOnDragDetected(event -> {
+            if (user == null || isSprintClosed())
+                return;
+
+            Role role = user.getRole();
+            boolean isAssigned = task.getAssignee() != null && task.getAssignee().equals(user);
+
+            // Permissions de drag:
+            // - ADMIN & SM peuvent tout dragger.
+            // - PO peut dragger pour la planification (Backlog <-> Sprint).
+            // - USER peut dragger ses tâches assignées.
+            boolean canDrag = (role == Role.ADMIN || role == Role.SCRUM_MASTER ||
+                    role == Role.PRODUCT_OWNER ||
+                    (role == Role.USER && isAssigned));
+
+            if (!canDrag) {
+                event.consume();
+                return;
+            }
+
             Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent content = new ClipboardContent();
             content.putString(String.valueOf(task.getId())); // Utiliser l'ID comme identifiant
@@ -558,7 +610,7 @@ public class kanbanController {
 
     private void setupDropTarget(VBox column, TaskStatus targetStatus) {
         column.setOnDragOver(event -> {
-            if (event.getGestureSource() != column && event.getDragboard().hasString()) {
+            if (!isSprintClosed() && event.getGestureSource() != column && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
             event.consume();
@@ -583,9 +635,34 @@ public class kanbanController {
             if (dragboard.hasString()) {
                 try {
                     long taskId = Long.parseLong(dragboard.getString());
-
                     Task managedTask = taskDAO.getByIdWithCollections(taskId);
+
                     if (managedTask != null) {
+                        Role role = user.getRole();
+                        boolean isAssigned = managedTask.getAssignee() != null
+                                && managedTask.getAssignee().equals(user);
+
+                        // Validation fine des droits lors du drop
+                        boolean allowed = false;
+                        if (role == Role.ADMIN || role == Role.SCRUM_MASTER) {
+                            allowed = true; // SM & ADMIN ont tout pouvoir
+                        } else if (role == Role.PRODUCT_OWNER) {
+                            // PO can move to/from Backlog
+                            allowed = (managedTask.getStatus() == TaskStatus.BACKLOG
+                                    || targetStatus == TaskStatus.BACKLOG);
+                        } else if (role == Role.USER && isAssigned) {
+                            // USER can move their own tasks but NOT into/out of Backlog (SM/PO role)
+                            allowed = (managedTask.getStatus() != TaskStatus.BACKLOG
+                                    && targetStatus != TaskStatus.BACKLOG);
+                        }
+
+                        if (!allowed) {
+                            System.err.println("Permission de drop refusée pour le rôle " + role);
+                            event.setDropCompleted(false);
+                            event.consume();
+                            return;
+                        }
+
                         managedTask.setStatus(targetStatus);
                         if (targetStatus == TaskStatus.BACKLOG) {
                             managedTask.setSprint(null);

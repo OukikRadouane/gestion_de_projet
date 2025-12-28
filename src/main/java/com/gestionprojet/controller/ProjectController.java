@@ -2,6 +2,7 @@ package com.gestionprojet.controller;
 
 import com.gestionprojet.dao.ProjectDAO;
 import com.gestionprojet.model.Project;
+import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.service.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
@@ -54,6 +55,13 @@ public class ProjectController {
             showError("Veuillez remplir le champ de Nom ");
             return;
         }
+
+        Role currentRole = SessionManager.getInstance().getCurrentUser().getRole();
+        if (currentRole != Role.ADMIN && currentRole != Role.PRODUCT_OWNER) {
+            showError("Vous n'avez pas les droits pour " + (project == null ? "créer" : "modifier") + " un projet.");
+            return;
+        }
+
         try {
             if (project == null) {
                 project = new Project(name, desc, SessionManager.getInstance().getCurrentUser());

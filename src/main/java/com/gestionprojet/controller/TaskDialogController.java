@@ -4,6 +4,7 @@ import com.gestionprojet.model.*;
 import com.gestionprojet.model.Tasks.Priority;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
+import com.gestionprojet.model.enums.Role;
 import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -118,6 +119,54 @@ public class TaskDialogController {
 
     public void setCurrentUser(com.gestionprojet.model.User user) {
         this.currentUser = user;
+        applyRoles();
+    }
+
+    private void applyRoles() {
+        if (currentUser == null)
+            return;
+
+        // Check if sprint is closed
+        boolean isClosed = sprint != null && (sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED
+                || sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.CANCELLED);
+
+        if (isClosed) {
+            taskNameField.setEditable(false);
+            descriptionField.setEditable(false);
+            dueDatePicker.setDisable(true);
+            priorityChoice.setDisable(true);
+            statusChoice.setDisable(true);
+            assigneChoice.setDisable(true);
+            return; // Everything locked for closed sprints
+        }
+
+        Role role = currentUser.getRole();
+        if (role == Role.ADMIN)
+            return;
+
+        if (role == Role.PRODUCT_OWNER) {
+            return;
+        }
+
+        if (role == Role.SCRUM_MASTER) {
+            taskNameField.setEditable(false);
+            descriptionField.setEditable(false);
+            dueDatePicker.setDisable(true);
+            priorityChoice.setDisable(true);
+        }
+
+        if (role == Role.USER) {
+            taskNameField.setEditable(false);
+            descriptionField.setEditable(false);
+            dueDatePicker.setDisable(true);
+            priorityChoice.setDisable(true);
+            assigneChoice.setDisable(true);
+
+            boolean isAssignee = task != null && task.getAssignee() != null && task.getAssignee().equals(currentUser);
+            if (!isAssignee) {
+                statusChoice.setDisable(true);
+            }
+        }
     }
 
     public void saveTask() {
@@ -131,6 +180,15 @@ public class TaskDialogController {
         if (name.isEmpty()) {
             showError("Le nom de la tâche est requis");
             return;
+        }
+
+        Role role = currentUser.getRole();
+        if (role == Role.USER) {
+            boolean isAssignee = task != null && task.getAssignee() != null && task.getAssignee().equals(currentUser);
+            if (task == null || !isAssignee) {
+                showError("Vous ne pouvez pas créer de tâches ou modifier des tâches qui ne vous sont pas assignées.");
+                return;
+            }
         }
         if (status == null) {
             showError("Le status est requis");
@@ -178,6 +236,7 @@ public class TaskDialogController {
             this.project = task.getProject();
             this.sprint = task.getSprint();
         }
+        applyRoles();
     }
 
     public void showError(String message) {

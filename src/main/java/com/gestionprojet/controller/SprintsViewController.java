@@ -8,7 +8,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import com.gestionprojet.model.enums.Role;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -26,6 +28,8 @@ public class SprintsViewController {
     private GridPane sprintsGrid;
     @FXML
     private VBox emptyStateContainer;
+    @FXML
+    private Button btnAddSprint;
 
     private SprintDAO sprintDAO = new SprintDAO();
     private Project project;
@@ -47,6 +51,12 @@ public class SprintsViewController {
 
     public void setCurrentUser(com.gestionprojet.model.User user) {
         this.currentUser = user;
+        if (btnAddSprint != null && user != null) {
+            Role role = user.getRole();
+            boolean canAdd = (role == Role.ADMIN || role == Role.SCRUM_MASTER);
+            btnAddSprint.setVisible(canAdd);
+            btnAddSprint.setManaged(canAdd);
+        }
     }
 
     public com.gestionprojet.model.User getCurrentUser() {

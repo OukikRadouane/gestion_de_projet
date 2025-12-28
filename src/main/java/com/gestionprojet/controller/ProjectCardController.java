@@ -1,8 +1,11 @@
 package com.gestionprojet.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import com.gestionprojet.model.Project;
+import com.gestionprojet.model.enums.Role;
+import com.gestionprojet.service.SessionManager;
 
 public class ProjectCardController {
 
@@ -23,6 +26,12 @@ public class ProjectCardController {
 
     @FXML
     private Label statusLabel;
+
+    @FXML
+    private Button btnEditProject;
+
+    @FXML
+    private Button btnDeleteProject;
 
     private Project currentProject;
     private DashboardController dashboardController;
@@ -46,6 +55,18 @@ public class ProjectCardController {
         }
 
         updateStatus(project);
+
+        // RBAC logic for buttons
+        Role role = SessionManager.getInstance().getCurrentUser().getRole();
+        boolean canManage = (role == Role.ADMIN || role == Role.PRODUCT_OWNER);
+        if (btnEditProject != null) {
+            btnEditProject.setVisible(canManage);
+            btnEditProject.setManaged(canManage);
+        }
+        if (btnDeleteProject != null) {
+            btnDeleteProject.setVisible(canManage);
+            btnDeleteProject.setManaged(canManage);
+        }
     }
 
     private void updateStatus(Project project) {
