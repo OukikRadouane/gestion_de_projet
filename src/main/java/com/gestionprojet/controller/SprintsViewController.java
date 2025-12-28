@@ -72,6 +72,11 @@ public class SprintsViewController {
 
         List<Sprint> sprints = sprintDAO.getAllSprintsByProject(project);
 
+        // Filter for Developer role: Only active sprints visible
+        if (currentUser != null && currentUser.getRole() == Role.USER && sprints != null) {
+            sprints.removeIf(s -> s.getStatus() != com.gestionprojet.model.enums.SprintStatus.ACTIVE);
+        }
+
         if (sprints == null || sprints.isEmpty()) {
             if (emptyStateContainer != null) {
                 emptyStateContainer.setVisible(true);

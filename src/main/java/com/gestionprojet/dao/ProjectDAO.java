@@ -72,4 +72,17 @@ public class ProjectDAO {
                     .getResultList();
         }
     }
+
+    public List<Project> getProjectsByAssignedUser(User user) {
+        try (Session session = HibernateUtil.getSession()) {
+            String hql = "SELECT DISTINCT p FROM Project p " +
+                    "JOIN p.sprints s " +
+                    "JOIN s.tasks t " +
+                    "WHERE t.assignee.id = :userId " +
+                    "ORDER BY p.createdAt DESC";
+            return session.createQuery(hql, Project.class)
+                    .setParameter("userId", user.getId())
+                    .getResultList();
+        }
+    }
 }

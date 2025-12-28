@@ -145,6 +145,20 @@ public class kanbanController {
             tasks = new ArrayList<>();
             refreshColumns();
         }
+        applyRoleFiltering();
+    }
+
+    private void applyRoleFiltering() {
+        if (user == null || tasks == null)
+            return;
+
+        Role role = user.getRole();
+        if (role == Role.USER) {
+            // Developers only see their assigned tasks
+            tasks.removeIf(t -> t.getAssignee() == null || !t.getAssignee().getId().equals(user.getId()));
+            System.out.println("Kanban: Filtering tasks for USER. Remaining: " + tasks.size());
+            refreshColumns();
+        }
     }
 
     public Parent createView() {
@@ -579,14 +593,13 @@ public class kanbanController {
                 return;
 
             Role role = user.getRole();
-            boolean isAssigned = task.getAssignee() != null && task.getAssignee().equals(user);
+            boolean isAssigned = task.getAssignee() != null && task.getAssignee().getId().equals(user.getId());
 
             // Permissions de drag:
             // - ADMIN & SM peuvent tout dragger.
-            // - PO peut dragger pour la planification (Backlog <-> Sprint).
+            // - PO ne peut PAS déplacer les tâches dans le Kanban (selon nouvelle spec).
             // - USER peut dragger ses tâches assignées.
             boolean canDrag = (role == Role.ADMIN || role == Role.SCRUM_MASTER ||
-                    role == Role.PRODUCT_OWNER ||
                     (role == Role.USER && isAssigned));
 
             if (!canDrag) {

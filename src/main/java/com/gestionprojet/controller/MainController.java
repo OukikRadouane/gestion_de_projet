@@ -104,7 +104,7 @@ public class MainController {
 
     private void loadProjects() {
         if (authService != null && authService.isLoggedIn()) {
-            List<com.gestionprojet.model.Project> projects = authService.getAllProjectsOfCurrentUser();
+            List<com.gestionprojet.model.Project> projects = authService.getSelectableProjectsForUser();
             comboActiveProject.getItems().setAll(projects);
             if (!projects.isEmpty() && comboActiveProject.getValue() == null) {
                 comboActiveProject.setValue(projects.get(0));

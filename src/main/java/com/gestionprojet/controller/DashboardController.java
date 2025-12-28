@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DashboardController {
@@ -131,10 +132,20 @@ public class DashboardController {
         // Fetch projects from database if null or empty
         if ((projects == null || projects.isEmpty()) && authService != null && authService.isLoggedIn()) {
             try {
-                projects = projectDAO.getAllProjectsByUser(authService.getCurrentUser());
-                System.out.println("Fetched " + (projects != null ? projects.size() : 0) + " projects for dashboard.");
+                User currentUser = authService.getCurrentUser();
+                Role role = currentUser.getRole();
+
+                if (role == Role.SCRUM_MASTER) {
+                    // Scrum Master sees nothing in Dashboard (per spec)
+                    projects = new ArrayList<>();
+                } else {
+                    // All other roles see ONLY projects they created
+                    projects = projectDAO.getAllProjectsByUser(currentUser);
+                }
+
+                System.out.println("Dashboard: Fetched " + projects.size() + " created projects for role " + role);
             } catch (Exception e) {
-                System.err.println("Error fetching projects for dashboard: " + e.getMessage());
+                System.err.println("Error fetching dashboard projects: " + e.getMessage());
                 e.printStackTrace();
             }
         }

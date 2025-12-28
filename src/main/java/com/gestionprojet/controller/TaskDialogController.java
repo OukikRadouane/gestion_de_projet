@@ -162,7 +162,8 @@ public class TaskDialogController {
             priorityChoice.setDisable(true);
             assigneChoice.setDisable(true);
 
-            boolean isAssignee = task != null && task.getAssignee() != null && task.getAssignee().equals(currentUser);
+            boolean isAssignee = task != null && task.getAssignee() != null &&
+                    task.getAssignee().getId().equals(currentUser.getId());
             if (!isAssignee) {
                 statusChoice.setDisable(true);
             }

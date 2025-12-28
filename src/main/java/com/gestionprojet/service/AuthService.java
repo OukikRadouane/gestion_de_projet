@@ -15,7 +15,6 @@ public class AuthService {
     private final UserDAO userDAO;
     private final ProjectDAO projectDAO;
 
-
     public AuthService(UserDAO userDAO, ProjectDAO projectDAO) {
         this.userDAO = userDAO;
         this.projectDAO = projectDAO;
@@ -23,7 +22,7 @@ public class AuthService {
 
     public User register(String username, String email, String password, String confirmPassword, Role role) {
         System.out.println("Début inscription - Username: " + username + ", Email: " + email);
-        
+
         String validationError = ValidationUtils.validateRegistration(username, email, password, confirmPassword);
         if (validationError != null) {
             System.out.println("Erreur validation: " + validationError);
@@ -52,7 +51,7 @@ public class AuthService {
 
     public User login(String usernameOrEmail, String password) {
         System.out.println("Tentative de connexion: " + usernameOrEmail);
-        
+
         String validationError = ValidationUtils.validateLogin(usernameOrEmail, password);
         if (validationError != null) {
             System.out.println("Erreur validation: " + validationError);
@@ -121,14 +120,28 @@ public class AuthService {
 
         return userDAO.save(user);
     }
+
     public List<Project> getAllProjectsOfCurrentUser() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
+        if (currentUser == null)
             throw new IllegalStateException("Aucun utilisateur connecté");
-        }
-
         return projectDAO.getAllProjectsByUser(currentUser);
+    }
+
+    public List<Project> getSelectableProjectsForUser() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null)
+            throw new IllegalStateException("Aucun utilisateur connecté");
+
+        Role role = currentUser.getRole();
+        if (role == Role.ADMIN || role == Role.SCRUM_MASTER) {
+            return projectDAO.getAllProjects();
+        } else if (role == Role.USER) {
+            return projectDAO.getProjectsByAssignedUser(currentUser);
+        } else {
+            // PRODUCT_OWNER or other roles see only their own projects
+            return projectDAO.getAllProjectsByUser(currentUser);
+        }
     }
 
 }
