@@ -14,10 +14,12 @@ import java.util.Optional;
 public class AuthService {
     private final UserDAO userDAO;
     private final ProjectDAO projectDAO;
+    private final EmailService emailService;
 
     public AuthService(UserDAO userDAO, ProjectDAO projectDAO) {
         this.userDAO = userDAO;
         this.projectDAO = projectDAO;
+        this.emailService = new EmailService(); // Simple initialization
     }
 
     public User register(String username, String email, String password, String confirmPassword, Role role) {
@@ -46,6 +48,14 @@ public class AuthService {
 
         User savedUser = userDAO.save(user);
         System.out.println("Utilisateur enregistré avec ID: " + savedUser.getId());
+
+        // Envoi de l'email de confirmation
+        try {
+            emailService.sendConfirmationEmail(savedUser.getEmail(), savedUser.getUsername());
+        } catch (Exception e) {
+            System.err.println("Erreur non bloquante lors de l'envoi de l'email: " + e.getMessage());
+        }
+
         return savedUser;
     }
 
