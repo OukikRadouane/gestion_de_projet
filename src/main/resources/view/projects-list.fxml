@@ -29,7 +29,7 @@
                     </VBox>
                     <Region HBox.hgrow="ALWAYS" />
                     <HBox spacing="10">
-                        <Button text="Nouveau Projet" onAction="#AddProject" styleClass="button-primary" />
+                        <Button fx:id="btnAddProject" text="Nouveau Projet" onAction="#AddProject" styleClass="button-primary" />
                     </HBox>
                 </HBox>
 

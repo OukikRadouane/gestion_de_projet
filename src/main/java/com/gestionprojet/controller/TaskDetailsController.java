@@ -3,12 +3,14 @@ package com.gestionprojet.controller;
 import com.gestionprojet.model.Tasks.*;
 import com.gestionprojet.dao.TaskDAO;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 
 public class TaskDetailsController {
 
@@ -22,6 +24,8 @@ public class TaskDetailsController {
     private Label assigneeLabel;
     @FXML
     private Label sprintLabel;
+    @FXML
+    private Button btnEditTask;
 
     @FXML
     private TextArea descriptionArea;
@@ -35,6 +39,10 @@ public class TaskDetailsController {
     private TextArea logsArea;
     @FXML
     private TextField newSubtaskField;
+    @FXML
+    private HBox addSubtaskBox;
+    @FXML
+    private Button btnAddSubtask;
 
     private Subtask selectedSubtask = null;
     private Comment selectedComment = null;
@@ -44,6 +52,37 @@ public class TaskDetailsController {
 
     public void setCurrentUser(com.gestionprojet.model.User user) {
         this.currentUser = user;
+        applyRBAC();
+    }
+
+    private void applyRBAC() {
+        if (currentUser == null)
+            return;
+
+        com.gestionprojet.model.enums.Role role = currentUser.getRole();
+        boolean canEdit = (role == com.gestionprojet.model.enums.Role.ADMIN ||
+                role == com.gestionprojet.model.enums.Role.PRODUCT_OWNER);
+
+        if (btnEditTask != null) {
+            btnEditTask.setVisible(canEdit);
+            btnEditTask.setManaged(canEdit);
+        }
+
+        if (addSubtaskBox != null) {
+            addSubtaskBox.setVisible(canEdit);
+            addSubtaskBox.setManaged(canEdit);
+        }
+
+        // Disable subtask checkboxes if not allowed to edit details
+        for (javafx.scene.Node node : subtasksContainer.getChildren()) {
+            if (node instanceof HBox) {
+                for (javafx.scene.Node child : ((HBox) node).getChildren()) {
+                    if (child instanceof CheckBox) {
+                        child.setDisable(!canEdit);
+                    }
+                }
+            }
+        }
     }
 
     public void setTask(Task task) {
@@ -72,6 +111,7 @@ public class TaskDetailsController {
             HBox subtaskBox = createSubtaskBox(subtask);
             subtasksContainer.getChildren().add(subtaskBox);
         }
+        applyRBAC(); // Refresh RBAC after loading subtasks
     }
 
     private HBox createSubtaskBox(Subtask subtask) {
@@ -82,7 +122,7 @@ public class TaskDetailsController {
         CheckBox checkBox = new CheckBox(subtask.getTitle());
         checkBox.setSelected(subtask.isDone());
         checkBox.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(checkBox, Priority.ALWAYS);
+        HBox.setHgrow(checkBox, javafx.scene.layout.Priority.ALWAYS);
 
         updateSubtaskStyle(checkBox, subtask.isDone());
 
@@ -166,7 +206,7 @@ public class TaskDetailsController {
         Label label = new Label(authorName + ": " + comment.getText());
         label.setWrapText(true);
         label.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(label, Priority.ALWAYS);
+        HBox.setHgrow(label, javafx.scene.layout.Priority.ALWAYS);
         // Gestion de la sélection
         commentBox.setOnMouseClicked(e -> {
             clearCommentSelection();
@@ -317,6 +357,30 @@ public class TaskDetailsController {
             this.task = taskDAO.save(task);
         } catch (Exception e) {
             showAlert("Erreur de sauvegarde", "Erreur lors de la sauvegarde: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleEditTask() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            TaskDialogController controller = loader.getController();
+            controller.setCurrentUser(this.currentUser);
+            controller.setTask(this.task);
+
+            Stage stage = new Stage();
+            stage.setTitle("Modifier la Tâche");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            // Refresh details after editing
+            this.task = taskDAO.getByIdWithCollections(this.task.getId());
+            loadTaskDetails();
+        } catch (Exception e) {
+            showAlert("Erreur", "Erreur lors de l'ouverture du formulaire d'édition: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -1,6 +1,8 @@
 package com.gestionprojet.controller;
 
-import com.gestionprojet.model.*;
+import com.gestionprojet.model.User;
+import com.gestionprojet.model.Project;
+import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.Tasks.Priority;
 import com.gestionprojet.model.Tasks.Task;
 import com.gestionprojet.model.Tasks.TaskStatus;
@@ -76,8 +78,11 @@ public class TaskDialogController {
             }
         });
 
-        // Initialiser le sélecteur d'utilisateurs
-        assigneChoice.getItems().addAll(userDAO.findAll());
+        // Initialiser le sélecteur d'utilisateurs - Filtrer pour n'afficher que le rôle
+        // USER
+        userDAO.findAll().stream()
+                .filter(u -> u.getRole() == Role.USER)
+                .forEach(assigneChoice.getItems()::add);
 
         // Définir comment afficher les utilisateurs dans la liste déroulante
         javafx.util.StringConverter<User> userConverter = new javafx.util.StringConverter<>() {
@@ -153,6 +158,7 @@ public class TaskDialogController {
             descriptionField.setEditable(false);
             dueDatePicker.setDisable(true);
             priorityChoice.setDisable(true);
+            assigneChoice.setDisable(true);
         }
 
         if (role == Role.USER) {

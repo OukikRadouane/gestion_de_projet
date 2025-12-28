@@ -379,6 +379,7 @@ public class kanbanController {
             Parent root = loader.load();
 
             TaskDialogController controller = loader.getController();
+            controller.setCurrentUser(this.user); // Pass user to allow saving
             controller.setProject(this.project);
             controller.setSprint(this.sprint);
             controller.setTask(null);
@@ -597,7 +598,7 @@ public class kanbanController {
 
             // Permissions de drag:
             // - ADMIN & SM peuvent tout dragger.
-            // - PO ne peut PAS déplacer les tâches dans le Kanban (selon nouvelle spec).
+            // - PO ne peut PAS déplacer les tâches.
             // - USER peut dragger ses tâches assignées.
             boolean canDrag = (role == Role.ADMIN || role == Role.SCRUM_MASTER ||
                     (role == Role.USER && isAssigned));
@@ -659,10 +660,6 @@ public class kanbanController {
                         boolean allowed = false;
                         if (role == Role.ADMIN || role == Role.SCRUM_MASTER) {
                             allowed = true; // SM & ADMIN ont tout pouvoir
-                        } else if (role == Role.PRODUCT_OWNER) {
-                            // PO can move to/from Backlog
-                            allowed = (managedTask.getStatus() == TaskStatus.BACKLOG
-                                    || targetStatus == TaskStatus.BACKLOG);
                         } else if (role == Role.USER && isAssigned) {
                             // USER can move their own tasks but NOT into/out of Backlog (SM/PO role)
                             allowed = (managedTask.getStatus() != TaskStatus.BACKLOG
@@ -740,8 +737,8 @@ public class kanbanController {
             System.out.println("FXML loaded successfully");
 
             TaskDetailsController controller = loader.getController();
-            controller.setTask(fullTask);
             controller.setCurrentUser(this.user);
+            controller.setTask(fullTask);
             System.out.println("Controller initialized");
 
             Stage stage = new Stage();
