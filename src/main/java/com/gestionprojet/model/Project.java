@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class Project {
     @JoinColumn(name = "creator_id")
     private User creator;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sprint> sprints = new ArrayList<>();
 

@@ -114,15 +114,30 @@ public class BacklogController {
 
         dialog.showAndWait().ifPresent(sprint -> {
             try {
+                // Validation stricte
+                if (sprint.getProject() != null && !sprint.getProject().getId().equals(project.getId())) {
+                    new Alert(Alert.AlertType.ERROR, "Le sprint sélectionné n'appartient pas au projet en cours.")
+                            .showAndWait();
+                    return;
+                }
+                if (sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED) {
+                    new Alert(Alert.AlertType.ERROR, "Impossible de planifier dans un sprint terminé.").showAndWait();
+                    return;
+                }
+
                 task.setSprint(sprint);
                 task.setStatus(com.gestionprojet.model.Tasks.TaskStatus.TO_DO);
-                task.setPriority(com.gestionprojet.model.Tasks.Priority.HIGH); // Priorité élevée automatique
-                task.addLog("Tâche planifiée dans le sprint : " + sprint.getName() + " (Priorité mise à HIGH)",
-                        currentUser);
+                // Le statut passe à TO_DO, la priorité est conservée (ou gérée par le DAO si
+                // null)
+
+                String logMessage = "Tâche planifiée dans le sprint : " + sprint.getName();
+                task.addLog(logMessage, currentUser);
+
                 taskDAO.update(task);
-                loadBacklog(); // Rafraîchir la table
+                loadBacklog(); // Rafraîchir la table pour retirer la tâche immédiatement
             } catch (Exception e) {
                 e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR, "Erreur lors de la planification : " + e.getMessage()).showAndWait();
             }
         });
     }
