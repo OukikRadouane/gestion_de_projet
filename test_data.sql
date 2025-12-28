@@ -1,6 +1,3 @@
--- SQL Script to populate the database with test data for RBAC testing
--- This script cleans existing data and inserts new test data
-
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE task;
 TRUNCATE TABLE sprint;
