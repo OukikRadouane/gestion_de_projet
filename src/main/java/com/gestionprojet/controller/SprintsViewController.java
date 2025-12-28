@@ -12,7 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -134,11 +133,33 @@ public class SprintsViewController {
             controller.setCurrentUser(this.currentUser);
 
             Stage stage = new Stage();
-            stage.setTitle(sprint == null ? "Nouveau Sprint" : "Modifier Sprint");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setWidth(500);
-            stage.setHeight(550);
+            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // Centrer la fenêtre relative à la fenêtre principale
+            stage.setOnShown(e -> {
+                Stage owner = (Stage) projectNameLabel.getScene().getWindow();
+                if (owner != null) {
+                    stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+                    stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
+                }
+            });
+
+            // Permettre le déplacement
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+            root.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+            root.setOnMouseDragged(event -> {
+                stage.setX(event.getScreenX() - xOffset[0]);
+                stage.setY(event.getScreenY() - yOffset[0]);
+            });
+
             stage.showAndWait();
         } catch (Exception e) {
             System.err.println("Erreur ouverture formulaire sprint: " + e.getMessage());

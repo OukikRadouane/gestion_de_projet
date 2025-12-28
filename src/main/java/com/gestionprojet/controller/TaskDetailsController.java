@@ -22,6 +22,10 @@ public class TaskDetailsController {
     private Label assigneeLabel;
     @FXML
     private Label sprintLabel;
+    @FXML
+    private Label projectLabel;
+    @FXML
+    private Label deadlineLabel;
 
     @FXML
     private TextArea descriptionArea;
@@ -57,6 +61,8 @@ public class TaskDetailsController {
         priorityLabel.setText(task.getPriority().name());
         assigneeLabel.setText(task.getAssignee() != null ? task.getAssignee().getUsername() : "Non assigné");
         sprintLabel.setText(task.getSprint() != null ? task.getSprint().getName() : "Aucun");
+        projectLabel.setText(task.getProject() != null ? task.getProject().getName() : "Aucun");
+        deadlineLabel.setText(task.getDeadline() != null ? task.getDeadline().toString() : "Aucune");
 
         descriptionArea.setText(task.getDescription() != null ? task.getDescription() : "");
 

@@ -74,6 +74,23 @@
     border-width: 1px;
 }
 
+.dialog-root {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 30, 0, 0, 10);
+}
+
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+}
+
+.icon-button:hover {
+    -fx-background-color: #F3F4F6;
+}
+
 .card:hover {
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 15, 0, 0, 8);
 }

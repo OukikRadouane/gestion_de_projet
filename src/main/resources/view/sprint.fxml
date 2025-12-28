@@ -6,14 +6,19 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.gestionprojet.controller.SprintController"
-      stylesheets="@../css/style.css"
-      spacing="25" prefWidth="550">
-    
-    <padding>
-        <Insets top="40" right="40" bottom="40" left="40"/>
-    </padding>
+      styleClass="dialog-root" stylesheets="@../css/style.css"
+      spacing="10" prefWidth="550">
 
-    <Label fx:id="titleLabel" text="Détails du sprint" styleClass="h1" />
+    <!-- Custom Title Bar -->
+    <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15 20 0 20;">
+        <Label fx:id="titleLabel" text="Détails du sprint" styleClass="h2" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-text-fill: -fx-text-secondary;" />
+        <Button text="✕" onAction="#handleCancel" styleClass="icon-button" style="-fx-font-size: 18px; -fx-text-fill: #9CA3AF;" />
+    </HBox>
+
+    <VBox spacing="20">
+        <padding>
+            <Insets top="0" right="40" bottom="40" left="40"/>
+        </padding>
 
     <VBox spacing="20">
         <VBox spacing="8">
@@ -60,4 +65,5 @@
         <Button text="Annuler" onAction="#handleCancel" styleClass="button-outline" prefWidth="120" />
         <Button text="Enregistrer" onAction="#handleSave" styleClass="button-primary" prefWidth="120" />
     </HBox>
+</VBox>
 </VBox>

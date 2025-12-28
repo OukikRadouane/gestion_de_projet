@@ -4,15 +4,20 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.gestionprojet.controller.TaskDetailsController"
-            fitToWidth="true" stylesheets="@../css/style.css"
-            style="-fx-background-color: white; -fx-background: white; -fx-border-color: transparent;">
-    
-    <VBox spacing="25" style="-fx-background-color: white;">
-        <padding>
-            <Insets top="40" right="40" bottom="40" left="40"/>
-        </padding>
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestionprojet.controller.TaskDetailsController"
+      styleClass="dialog-root" stylesheets="@../css/style.css"
+      prefWidth="900" prefHeight="800">
+
+    <!-- Custom Title Bar -->
+    <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15 20 0 20;">
+        <Button text="✕" onAction="#handleClose" styleClass="icon-button" style="-fx-font-size: 18px; -fx-text-fill: #9CA3AF;" />
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent; -fx-padding: 0 40 40 40;">
+        
+        <VBox spacing="25" style="-fx-background-color: transparent;">
 
         <!-- Header -->
         <VBox spacing="10">
@@ -39,11 +44,17 @@
                 <ColumnConstraints hgrow="ALWAYS" />
             </columnConstraints>
 
-            <Label text="Assigné à" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <Label fx:id="assigneeLabel" text="Unassigned" style="-fx-font-weight: 600;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Label text="Projet" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="projectLabel" text="N/A" style="-fx-font-weight: 600;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-            <Label text="Sprint" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <Label fx:id="sprintLabel" text="Backlog" style="-fx-font-weight: 600;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Assigné à" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Label fx:id="assigneeLabel" text="Unassigned" style="-fx-font-weight: 600;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Sprint" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label fx:id="sprintLabel" text="Backlog" style="-fx-font-weight: 600;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label text="Date Limite" styleClass="small-text" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <Label fx:id="deadlineLabel" text="N/A" style="-fx-font-weight: 600; -fx-text-fill: #EF4444;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
         </GridPane>
 
         <Separator style="-fx-opacity: 0.5;" />
@@ -81,4 +92,5 @@
             <Button text="Fermer" onAction="#handleClose" styleClass="button-outline" />
         </HBox>
     </VBox>
-</ScrollPane>
+    </ScrollPane>
+</VBox>

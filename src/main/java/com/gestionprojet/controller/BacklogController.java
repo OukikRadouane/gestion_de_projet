@@ -6,6 +6,7 @@ import com.gestionprojet.model.Project;
 import com.gestionprojet.model.Sprint;
 import com.gestionprojet.model.User;
 import com.gestionprojet.model.Tasks.Task;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -33,7 +34,7 @@ public class BacklogController {
     @FXML
     private TableColumn<Task, String> colAssignee;
     @FXML
-    private TableColumn<Task, Void> colActions;
+    private TableColumn<Task, Task> colActions;
 
     private final TaskDAO taskDAO = new TaskDAO();
     private final SprintDAO sprintDAO = new SprintDAO();
@@ -51,6 +52,7 @@ public class BacklogController {
         colAssignee.setCellValueFactory(cellData -> new SimpleStringProperty(
                 cellData.getValue().getAssignee() != null ? cellData.getValue().getAssignee().getUsername()
                         : "Non assigné"));
+        colActions.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue()));
 
         setupActionsColumn();
     }
@@ -64,22 +66,24 @@ public class BacklogController {
                 btnPlanify.getStyleClass().add("button-primary");
                 btnPlanify.setStyle("-fx-padding: 4 8; -fx-font-size: 11px;");
                 btnPlanify.setOnAction(event -> {
-                    Task task = getTableView().getItems().get(getIndex());
-                    handlePlanify(task);
+                    Task task = getTableRow().getItem();
+                    if (task != null)
+                        handlePlanify(task);
                 });
 
                 btnDetails.getStyleClass().add("button-outline");
                 btnDetails.setStyle("-fx-padding: 4 8; -fx-font-size: 11px;");
                 btnDetails.setOnAction(event -> {
-                    Task task = getTableView().getItems().get(getIndex());
-                    handleDetails(task);
+                    Task task = getTableRow().getItem();
+                    if (task != null)
+                        handleDetails(task);
                 });
             }
 
             @Override
-            protected void updateItem(Void item, boolean empty) {
+            protected void updateItem(Task item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || item == null) {
                     setGraphic(null);
                 } else {
                     setGraphic(container);
@@ -91,24 +95,35 @@ public class BacklogController {
     private void handlePlanify(Task task) {
         if (project == null)
             return;
-        List<Sprint> sprints = sprintDAO.getAllSprintsByProject(project);
-        if (sprints.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Aucun sprint disponible pour ce projet.");
-            alert.show();
+
+        List<Sprint> projectSprints = sprintDAO.getAllSprintsByProject(project);
+        List<Sprint> activeSprints = projectSprints.stream()
+                .filter(s -> s.getStatus() != com.gestionprojet.model.enums.SprintStatus.COMPLETED)
+                .collect(Collectors.toList());
+
+        if (activeSprints.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Aucun sprint actif ou planifié disponible.");
+            alert.showAndWait();
             return;
         }
 
-        ChoiceDialog<Sprint> dialog = new ChoiceDialog<>(sprints.get(0), sprints);
+        ChoiceDialog<Sprint> dialog = new ChoiceDialog<>(activeSprints.get(0), activeSprints);
         dialog.setTitle("Planifier la tâche");
         dialog.setHeaderText("Choisir un sprint pour : " + task.getTitle());
         dialog.setContentText("Sprint :");
 
         dialog.showAndWait().ifPresent(sprint -> {
-            task.setSprint(sprint);
-            task.setStatus(com.gestionprojet.model.Tasks.TaskStatus.TO_DO);
-            task.addLog("Tâche planifiée dans le sprint : " + sprint.getName(), currentUser);
-            taskDAO.update(task);
-            loadBacklog();
+            try {
+                task.setSprint(sprint);
+                task.setStatus(com.gestionprojet.model.Tasks.TaskStatus.TO_DO);
+                task.setPriority(com.gestionprojet.model.Tasks.Priority.HIGH); // Priorité élevée automatique
+                task.addLog("Tâche planifiée dans le sprint : " + sprint.getName() + " (Priorité mise à HIGH)",
+                        currentUser);
+                taskDAO.update(task);
+                loadBacklog(); // Rafraîchir la table
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -134,7 +149,7 @@ public class BacklogController {
             return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
-            Parent root = loader.load();
+            Parent rootNode = loader.load();
 
             TaskDialogController controller = loader.getController();
             controller.setProject(project);
@@ -142,10 +157,34 @@ public class BacklogController {
             controller.setCurrentUser(currentUser);
 
             Stage stage = new Stage();
-            stage.setTitle("Nouvelle Tâche au Backlog");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
+            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
 
+            Scene scene = new Scene(rootNode);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // Centrer la fenêtre
+            stage.setOnShown(e -> {
+                Stage owner = (Stage) backlogTable.getScene().getWindow();
+                if (owner != null) {
+                    stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+                    stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
+                }
+            });
+
+            // Déplacement
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+            rootNode.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+            rootNode.setOnMouseDragged(event -> {
+                stage.setX(event.getScreenX() - xOffset[0]);
+                stage.setY(event.getScreenY() - yOffset[0]);
+            });
+
+            stage.showAndWait();
             loadBacklog();
         } catch (IOException e) {
             e.printStackTrace();
@@ -153,18 +192,46 @@ public class BacklogController {
     }
 
     private void handleDetails(Task task) {
-        // Logic for details (can reuse TaskDetailsController)
         try {
+            Task fullTask = taskDAO.getByIdWithCollections(task.getId());
+            if (fullTask == null)
+                return;
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDetailsView.fxml"));
             Parent root = loader.load();
 
             TaskDetailsController controller = loader.getController();
-            controller.setTask(task);
-            controller.setCurrentUser(currentUser);
+            controller.setTask(fullTask);
+            controller.setCurrentUser(this.currentUser);
 
             Stage stage = new Stage();
-            stage.setTitle("Détails de la tâche - " + task.getTitle());
-            stage.setScene(new Scene(root, 900, 800));
+            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root, 900, 800);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // Centrer la fenêtre
+            stage.setOnShown(e -> {
+                Stage owner = (Stage) backlogTable.getScene().getWindow();
+                if (owner != null) {
+                    stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+                    stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
+                }
+            });
+
+            // Déplacement
+            final double[] xOffset = new double[1];
+            final double[] yOffset = new double[1];
+            root.setOnMousePressed(event -> {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            });
+            root.setOnMouseDragged(event -> {
+                stage.setX(event.getScreenX() - xOffset[0]);
+                stage.setY(event.getScreenY() - yOffset[0]);
+            });
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

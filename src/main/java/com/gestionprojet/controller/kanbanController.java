@@ -15,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -268,21 +270,23 @@ public class kanbanController {
             System.err.println("Aucun projet sélectionné pour ajouter une tâche");
             return;
         }
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
-            Parent root = loader.load();
+            Parent rootNode = loader.load();
 
             TaskDialogController controller = loader.getController();
             controller.setProject(this.project);
             controller.setSprint(this.sprint);
-            controller.setTask(null);
 
             Stage stage = new Stage();
-            stage.setTitle("Nouvelle Tâche");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(rootNode);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
 
+            setupStageInteractions(stage, rootNode);
+
+            stage.showAndWait();
             reloadTasks();
         } catch (Exception e) {
             e.printStackTrace();
@@ -445,12 +449,28 @@ public class kanbanController {
                 "-fx-background-color: #E2E8F0; -fx-text-fill: #475569; -fx-font-size: 10px; -fx-font-weight: bold; " +
                         "-fx-min-width: 22; -fx-min-height: 22; -fx-background-radius: 11; -fx-alignment: center;");
 
-        Button editButton = new Button("Détails");
-        editButton.getStyleClass().add("button-outline");
-        editButton.setStyle("-fx-padding: 4 10; -fx-font-size: 11px;");
-        editButton.setOnAction(e -> openTaskDetails(task));
+        Button btnDetails = new Button("Détails");
+        btnDetails.getStyleClass().add("button-outline");
+        btnDetails.setStyle("-fx-padding: 4 8; -fx-font-size: 11px;");
+        btnDetails.setOnAction(e -> openTaskDetails(task));
 
-        footer.getChildren().addAll(prioLabel, spacer, assigneeLabel, editButton);
+        Button btnEdit = new Button("✎");
+        btnEdit.getStyleClass().add("button-outline");
+        btnEdit.setStyle("-fx-padding: 4 8; -fx-font-size: 11px; -fx-text-fill: #3B82F6;");
+        btnEdit.setOnAction(e -> {
+            e.consume();
+            handleEditTask(task);
+        });
+
+        Button btnDelete = new Button("🗑");
+        btnDelete.getStyleClass().add("button-outline");
+        btnDelete.setStyle("-fx-padding: 4 8; -fx-font-size: 11px; -fx-text-fill: #EF4444;");
+        btnDelete.setOnAction(e -> {
+            e.consume();
+            handleDeleteTask(task);
+        });
+
+        footer.getChildren().addAll(prioLabel, spacer, assigneeLabel, btnDetails, btnEdit, btnDelete);
         card.getChildren().addAll(titleRow, descLabel, footer);
 
         setupDragSource(card, task);
@@ -558,6 +578,73 @@ public class kanbanController {
         });
     }
 
+    private void handleEditTask(Task task) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/TaskDialog.fxml"));
+            Parent root = loader.load();
+
+            TaskDialogController controller = loader.getController();
+            controller.setProject(this.project);
+            controller.setSprint(this.sprint);
+            controller.setTask(task);
+
+            Stage stage = new Stage();
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // Centrer et Déplacement
+            setupStageInteractions(stage, root);
+
+            stage.showAndWait();
+            reloadTasks();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupStageInteractions(Stage stage, Parent rootNode) {
+        // Centrer la fenêtre relative à la fenêtre principale
+        stage.setOnShown(e -> {
+            Stage owner = (Stage) root.getScene().getWindow();
+            if (owner != null) {
+                stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+                stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
+            }
+        });
+
+        // Permettre le déplacement
+        final double[] xOffset = new double[1];
+        final double[] yOffset = new double[1];
+        root.setOnMousePressed(event -> {
+            xOffset[0] = event.getSceneX();
+            yOffset[0] = event.getSceneY();
+        });
+        root.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() - xOffset[0]);
+            stage.setY(event.getScreenY() - yOffset[0]);
+        });
+    }
+
+    private void handleDeleteTask(Task task) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Suppression");
+        confirm.setHeaderText("Supprimer la tâche ?");
+        confirm.setContentText("Êtes-vous sûr de vouloir supprimer : " + task.getTitle() + " ?");
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    taskDAO.delete(task.getId());
+                    reloadTasks();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void openTaskDetails(Task task) {
         System.out.println("Attempting to open details for task: " + task.getId());
         try {
@@ -579,9 +666,15 @@ public class kanbanController {
             System.out.println("Controller initialized");
 
             Stage stage = new Stage();
-            stage.setTitle("Détails de la tâche - " + fullTask.getTitle());
-            stage.setScene(new Scene(root, 900, 800));
-            stage.initStyle(StageStyle.UNDECORATED);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root, 900, 800);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            // Centrer et Déplacement
+            setupStageInteractions(stage, root);
+
             stage.show();
             System.out.println("Stage shown");
         } catch (Exception ex) {

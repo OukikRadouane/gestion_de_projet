@@ -143,12 +143,16 @@ public class TaskDialogController {
         try {
             if (task == null) {
                 task = new Task(name, description, status, priority, deadline, assignee, sprint, project);
+                if (sprint == null) {
+                    task.setPriority(Priority.HIGH); // Priorité élevée pour le backlog
+                }
                 if (sprint != null && sprint.getStatus() == com.gestionprojet.model.enums.SprintStatus.COMPLETED
                         && status != TaskStatus.DONE) {
                     System.out.println(
                             "⚠️ Création d'une tâche non terminée dans un sprint clos. Redirection vers le backlog.");
                     task.setSprint(null);
                     task.setStatus(TaskStatus.BACKLOG);
+                    task.setPriority(Priority.HIGH);
                 }
                 task.addLog("Tâche créée", currentUser);
                 taskDAO.save(task);
